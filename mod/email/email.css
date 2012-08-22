@@ -1,0 +1,29 @@
+/***
+ *** Modules: Email
+ ***/
+
+/**
+ * Header for viewmail
+ **/
+.headermail {
+    background: #336799;
+    color : #ffffff;
+    font-size : 20px;
+    font-weight : bold;
+}
+
+/**
+ * Background color and text color for textarea who show send to,cc and/or bcc users
+ **/
+.textareacontacts {
+    background-color:#F4F4F4;
+    color: #000000;
+}
+
+/**
+ * Link to select user's to send mail
+ **/
+.extrabutton {
+    text-align: left;
+    width: 30%;
+}

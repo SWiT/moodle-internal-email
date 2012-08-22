@@ -1,0 +1,249 @@
+<form name="form" method="POST" action="<?php echo $CFG->wwwroot;?>/mod/email/view.php">
+    <tr class="headermails" align="left">
+        <td width="9%" align="center">
+            <b><?php echo get_string('check','email');?></b>
+        </td>
+        <td width="29%">
+            <?php
+                if ( $action == 'orderbysubjectasc' ) {
+                    echo "<b><a href=\"view.php?id=$id&action='orderbysubjectdsc'\">&raquo;".get_string('subject','email')." < </b></a></b>";
+                } else if( $action == 'orderbysubjectdsc' ) {
+                    echo "<b><a href=\"view.php?id=$id&action='orderbysubjectasc'\">&raquo;".get_string('subject','email')." > </a></b>";
+                        } else {
+                            echo "<b><a href=\"view.php?id=$id\">&raquo;".get_string('subject','email')."</a></b>";
+                        }
+           ?>
+            </td>
+            <td width="30%">
+                <b><?php echo get_string('from','internalmail');?></b>
+            </td>
+            <td width="16%">
+                <?php
+                    if($reply==5) { //ordena per data asc
+                        echo "<B><a href=\"view.php?id=$id&option=$option&page=$page&reply=6\">&raquo;".get_string('date','internalmail')." < </a></B>";
+                    } else if($reply==6) { //ordena per data desc
+                                echo "<B><a href=\"view.php?id=$id&option=$option&page=$page&reply=5\">&raquo;".get_string('date','internalmail')." > </a></B>";
+                            }else
+                            {
+                                echo "<B><a href=\"view.php?id=$id&option=$option&page=$page&reply=5\">&raquo;".get_string('date','internalmail')."</a></B>";
+                            }
+                ?>
+            </td>
+            <td width="9%">
+                <B><?php echo get_string('history','internalmail');?></B>
+            </td>
+            <td width="7%" align="center">
+                <B><?php echo get_string('picture','internalmail');?></B>
+            </td>
+        </tr>
+
+
+
+
+
+<?php
+    //Antoni Mas. Per ajuntar el màxim, hem de mirar si es tracta d'una cerca, que si és així, ja tenim els posts trets.
+    if ( $issearch ) {
+        $posts = $search;
+    } else {
+        $posts = internalmail_get_child_posts($folder,$reply);
+    }
+
+    if ($posts or $search) {
+        foreach ($posts as $post) {
+            if(($i>=$min) && ($i<$max)) {
+                if(!$post->mailed)
+                {
+                        echo "<tr class=\"listmail\" bgcolor=\"#CCCCCC\" align=\"left\">";
+                }else
+                {
+                        echo '<tr class="listmail" align="left">';
+                }
+        ?>
+                <td width="9%">
+              <?php
+                if($post->mailed) {
+              ?>
+                    <img src="images/mailopen.gif" width="24" height="24" align="absmiddle">
+                        <input type="checkbox" value="<?php echo $post->id;?>" name="ch[]">
+              <?php
+                }else
+                {
+              ?>
+                    <img src="images/mailclose.gif" width="24" height="24" align="absmiddle">
+                        <input type="checkbox" value="<?php echo $post->id;?>" name="ch[]">
+              <?php
+                }
+              ?>
+                </td>
+
+              <?php
+                if ( $issearch ) {
+                    echo '<td width="10%" align="center">';
+                            if ($post->parent == ($ghost + 1) )
+                            {
+                                print_string('inbox','internalmail');
+                            }else if ( $post->parent == ($ghost + 2) )
+                                    {
+                                        print_string('sent','internalmail');
+                                    } else
+                                    {
+                                        print_string('deleted','internalmail');
+                                    }
+                    echo '</td>';
+                }
+              ?>
+
+              <?php
+                $aux=internalmail_get_subject($post);
+                $subjbo=$aux[2];
+                if(strlen($subjbo) > 20) {
+                    $subjbo = substr($subjbo,0,20);
+                    $subjbo = $subjbo."...";
+                }
+              
+                if ( $issearch ) {
+                    echo '<td width="19%">';
+                }else
+                {
+                    echo '<td width="29%">';
+                }
+              
+                if ($post->attachment!="") {
+              ?>
+                    <img src="images/clip.gif" width="16" height="16" align="absmiddle">
+                        <a name="<?php echo $post->id;?>"></a>
+                            <font size="-1">
+                                <b>
+                                    <a href="view.php?id=<?php echo $id;?>&option=6&post=<?php echo $post->id;?>">
+                                        <?php echo $subjbo;?>
+                                    </a>
+                                </b>
+                            </font>
+              <?php
+                }else
+                {
+              ?>
+                    <a name="<?php echo $post->id;?>"></a>
+                        <font size="-1">
+                            <b>
+                                <a href="view.php?id=<?php echo $id;?>&option=6&post=<?php echo $post->id;?>">
+                                    <?php echo $subjbo;?>
+                                </a>
+                            </b>
+                        </font>
+              <?php
+                }
+              ?>
+                </td>
+                <td width="28%">
+              <?php
+                    global $DB;
+                    $sender = $DB->get_record("user",array("id"=>$aux[1]));
+                    echo fullname($sender);
+              ?>
+                </td>
+                <td width="18%">
+                    <font size="-2">
+                        <?php echo userdate($post->modified); ?>
+                    </font>
+                </td>
+                <td width="9%" align="center">
+                    <a name="<?php echo $post->id;?>"></a>
+                        <font size="-1">
+                            <b>
+                                <a href="view.php?id=<?php echo $id;?>&option=11&post=<?php echo $post->id;?>">
+                                    <img src="images/history.gif" width="24" height="24" align="middle">
+                                </a>
+                            </b>
+                        </font>
+                </td>
+                <td width="7%" align="center">
+                    <?php echo print_user_picture($sender->id, $course->id, $sender->picture); ?>
+                </td>
+            </tr>
+          <?php
+            $j++;
+            }
+        $i++;
+        }
+    }
+    ?>
+
+<?php 
+    //////////////calcul de les pagines/////////////
+
+    $pagelast=(($i / $n_x_page)-(($i % $n_x_page) / $n_x_page));
+    if(($i % $n_x_page)==0 && $i != 0)
+    {
+            $pagelast=$pagelast-1;
+    }
+    $pagelast=round($pagelast);
+    $pagemes=$page+1;
+    $pagemenos=$page-1;
+    //////////////fi calcul de les pagines/////////////
+?>
+
+
+
+    <tr>
+        <td width="60%" colspan="5" align="left">
+            <?php 
+                get_string('mostrando','internalmail');
+                if($i != 0) {
+                    echo ($n_x_page*$page)+1;
+                } else
+                {
+                    echo($n_x_page*$page);
+                }
+                echo get_string('al','internalmail'); 
+                echo ($n_x_page*$page)+$j;
+                echo get_string('de','internalmail'); 
+                echo $i; 
+                echo get_string('mensajes','internalmail');
+            ?>
+        </td>
+        <td>
+            <?php
+                if($page!=0) {
+                    echo "<a href=\"view.php?id=$id&option=$option&page=0\"> <<< </a>";
+                    echo "<a href=\"view.php?id=$id&option=$option&page=$pagemenos\"> << </a>";
+                }
+
+                if($page!=$pagelast) {
+                    echo "<a href=\"view.php?id=$id&option=$option&page=$pagemes\"> >> </a>";
+                    echo "<a href=\"view.php?id=$id&option=$option&page=$pagelast\"> >>> </a>";
+                }
+            ?>
+
+        </td>
+    </tr>
+    <tr>
+        <td colspan="6">
+
+            <p align="left">
+                <?php echo get_string('wanadoo','internalmail'); ?>
+            
+            <select name="Operation">
+                <option value="NOT"><?php echo get_string('nada','internalmail');?></option>
+                <option value="REM"><?php echo get_string('borrar','internalmail');?></option>
+            
+                <?php
+                    if($mode!="deleted") {
+                        echo "<option VALUE=\"RED\">".get_string('marcar leido','internalmail')."</option>";
+                        echo "<option VALUE=\"NRE\">".get_string('marcar no leido','internalmail')."</option>";
+                    }else
+                    {
+                        echo "<option VALUE=\"RES\">".get_string('restaurar','internalmail')."</option>";
+                    }
+                ?>
+            
+            </select>
+            <input type="hidden" name="id" value="<?php echo $id;?>">
+            <input type="hidden" name="mode" value="<?php echo $mode;?>">
+            <input type="submit" value="<?php echo get_string('go', 'internalmail');?>">
+            </p>
+        </td>
+    </tr>
+</table>
+</form>

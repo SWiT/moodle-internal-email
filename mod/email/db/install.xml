@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/email/db" VERSION="20111006" COMMENT="XMLDB file for Moodle mod/email"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="email" COMMENT="Email instance of course" NEXT="email_account">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="id" NEXT="course"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="name" NEXT="active"/>
+        <FIELD NAME="active" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="1" SEQUENCE="false" PREVIOUS="course" NEXT="maxbytes"/>
+        <FIELD NAME="maxbytes" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="4194300" SEQUENCE="false" PREVIOUS="active" NEXT="timecreated"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="maxbytes" NEXT="timemodified"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timecreated"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="course"/>
+        <KEY NAME="course" TYPE="unique" FIELDS="course" PREVIOUS="primary"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="email_account" COMMENT="Email account for user" PREVIOUS="email" NEXT="email_mail">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="emailid"/>
+        <FIELD NAME="emailid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="userid"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="account_emailid" UNIQUE="false" FIELDS="emailid" NEXT="account_userid"/>
+        <INDEX NAME="account_userid" UNIQUE="false" FIELDS="userid" PREVIOUS="account_emailid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="email_mail" COMMENT="All mails are stored in this table" PREVIOUS="email_account" NEXT="email_send">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="accountid"/>
+        <FIELD NAME="accountid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="subject"/>
+        <FIELD NAME="subject" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="accountid" NEXT="timecreated"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="subject" NEXT="body"/>
+        <FIELD NAME="body" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false" PREVIOUS="timecreated"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="mail_accountid" UNIQUE="false" FIELDS="accountid" NEXT="mail_subject"/>
+        <INDEX NAME="mail_subject" UNIQUE="false" FIELDS="subject" PREVIOUS="mail_accountid" NEXT="mail_timecreated"/>
+        <INDEX NAME="mail_timecreated" UNIQUE="false" FIELDS="timecreated" PREVIOUS="mail_subject"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="email_send" COMMENT="Mail user send, type and it is read" PREVIOUS="email_mail" NEXT="email_folder">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="accountid"/>
+        <FIELD NAME="accountid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="mailid"/>
+        <FIELD NAME="mailid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="accountid" NEXT="type"/>
+        <FIELD NAME="type" TYPE="char" LENGTH="3" NOTNULL="true" DEFAULT="to" SEQUENCE="false" PREVIOUS="mailid" NEXT="readed"/>
+        <FIELD NAME="readed" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="type"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="send_accountid" UNIQUE="false" FIELDS="accountid" NEXT="send_mailid"/>
+        <INDEX NAME="send_mailid" UNIQUE="false" FIELDS="mailid" PREVIOUS="send_accountid" NEXT="send_readed"/>
+        <INDEX NAME="send_readed" UNIQUE="false" FIELDS="readed" PREVIOUS="send_mailid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="email_folder" COMMENT="All Folders for store mails. &quot;isparenttype&quot; content only type of parents folders. There are inbox" PREVIOUS="email_send" NEXT="email_subfolder">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="accountid"/>
+        <FIELD NAME="accountid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="accountid" NEXT="timecreated"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="name" NEXT="isparenttype"/>
+        <FIELD NAME="isparenttype" TYPE="char" LENGTH="7" NOTNULL="false" SEQUENCE="false" PREVIOUS="timecreated"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="folder_accountid" UNIQUE="false" FIELDS="accountid" NEXT="folder_isparenttype"/>
+        <INDEX NAME="folder_isparenttype" UNIQUE="false" FIELDS="isparenttype" PREVIOUS="folder_accountid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="email_subfolder" COMMENT="SubFolders for one folder for store mails." PREVIOUS="email_folder" NEXT="email_foldermail">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="folderparentid"/>
+        <FIELD NAME="folderparentid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="folderchildid"/>
+        <FIELD NAME="folderchildid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="folderparentid"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="subfolder_folderparentid" UNIQUE="false" FIELDS="folderparentid" NEXT="subfolder_folderchildid"/>
+        <INDEX NAME="subfolder_folderchildid" UNIQUE="false" FIELDS="folderchildid" PREVIOUS="subfolder_folderparentid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="email_foldermail" COMMENT="Mails of one folder" PREVIOUS="email_subfolder" NEXT="email_filter">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="mailid"/>
+        <FIELD NAME="mailid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="folderid"/>
+        <FIELD NAME="folderid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="mailid"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="foldermail_mailid" UNIQUE="false" FIELDS="mailid" NEXT="foldermail_folderid"/>
+        <INDEX NAME="foldermail_folderid" UNIQUE="false" FIELDS="folderid" PREVIOUS="foldermail_mailid"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="email_filter" COMMENT="Filter mail for one folder" PREVIOUS="email_foldermail">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="folderid"/>
+        <FIELD NAME="folderid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="rules"/>
+        <FIELD NAME="rules" TYPE="text" LENGTH="big" NOTNULL="true" SEQUENCE="false" PREVIOUS="folderid"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>
