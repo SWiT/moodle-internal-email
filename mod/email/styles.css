@@ -51,3 +51,7 @@ body#page-mod-email-view #page-content #region-main {
 body#page-mod-email-participants div#frametop {
     min-width: 425px;
 }
+
+.modtype_email .editing_duplicate {
+    display:none;
+}
