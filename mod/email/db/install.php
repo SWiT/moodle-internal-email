@@ -15,22 +15,28 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the version and other meta-info about the plugin
+ * Provides code to be executed during the module installation
  *
- * Setting the $plugin->version to 0 prevents the plugin from being installed.
- * See https://docs.moodle.org/dev/version.php for more info.
+ * This file replaces the legacy STATEMENTS section in db/install.xml,
+ * lib.php/modulename_install() post installation hook and partially defaults.php.
  *
  * @package    mod_email
- * @copyright  2015 Your Name <your@email.address>
+ * @copyright  2015 Your Name <your@email.adress>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+/**
+ * Post installation procedure
+ *
+ * @see upgrade_plugins_modules()
+ */
+function xmldb_email_install() {
+}
 
-$plugin->component = 'mod_email';
-$plugin->version = 2016050600;
-$plugin->release = '3.0.3';
-$plugin->requires = 2014051200;
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->cron = 0;
-$plugin->dependencies = array();
+/**
+ * Post installation recovery procedure
+ *
+ * @see upgrade_plugins_modules()
+ */
+function xmldb_email_install_recovery() {
+}

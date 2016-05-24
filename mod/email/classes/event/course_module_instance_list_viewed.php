@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -16,13 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package moodlecore
- * @subpackage backup-moodle2
- * @copyright 2010 onwards YOUR_NAME_GOES_HERE {@link YOUR_URL_GOES_HERE}
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * The mod_email instance list viewed event.
+ *
+ * @package    mod_email
+ * @copyright  2015 Your Name <your@email.adress>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
- // This activity has not particular settings but the inherited from the generic
- // backup_activity_task so here there isn't any class definition, like the ones
- // existing in /backup/moodle2/backup_settingslib.php (activities section)
+namespace mod_email\event;
 
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * The mod_email instance list viewed event class.
+ *
+ * @package    mod_email
+ * @copyright  2015 Your Name <your@email.adress>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class course_module_instance_list_viewed extends \core\event\course_module_instance_list_viewed {
+}

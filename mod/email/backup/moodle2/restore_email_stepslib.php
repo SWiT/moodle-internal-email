@@ -1,127 +1,87 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Define all the restore steps that will be used by the restore_email_activity_task
+ *
+ * @package   mod_email
+ * @category  backup
+ * @copyright 2015 Your Name <your@email.adress>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
 /**
  * Structure step to restore one email activity
+ *
+ * @package   mod_email
+ * @category  backup
+ * @copyright 2015 Your Name <your@email.adress>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_email_activity_structure_step extends restore_activity_structure_step {
- 
+
+    /**
+     * Defines structure of path elements to be processed during the restore
+     *
+     * @return array of {@link restore_path_element}
+     */
     protected function define_structure() {
- 
+
         $paths = array();
-        $userinfo = $this->get_setting_value('userinfo');
- 
         $paths[] = new restore_path_element('email', '/activity/email');
-        if ($userinfo) {
-            $paths[] = new restore_path_element('email_account',    '/activity/email/accounts/email_account');
-            $paths[] = new restore_path_element('email_folder',     '/activity/email/folders/email_folder');
-            $paths[] = new restore_path_element('email_filter',     '/activity/email/folders/email_folder/filters/email_filter');
-            $paths[] = new restore_path_element('email_subfolder',  '/activity/email/subfolders/email_subfolder');
-            $paths[] = new restore_path_element('email_mail',       '/activity/email/mail/email_mail');
-            $paths[] = new restore_path_element('email_send',       '/activity/email/mail/email_mail/recipients/email_send');
-            $paths[] = new restore_path_element('email_foldermail', '/activity/email/foldermail/email_foldermail');
-        }
- 
-        // Return the paths wrapped into standard activity structure
+
+        // Return the paths wrapped into standard activity structure.
         return $this->prepare_activity_structure($paths);
     }
- 
+
+    /**
+     * Process the given restore path element data
+     *
+     * @param array $data parsed element data
+     */
     protected function process_email($data) {
         global $DB;
- 
+
         $data = (object)$data;
         $oldid = $data->id;
         $data->course = $this->get_courseid();
- 
-        $data->timecreated = $this->apply_date_offset($data->timecreated);
-        $data->timemodified = $this->apply_date_offset($data->timemodified);
- 
-        // insert the email record
+
+        if (empty($data->timecreated)) {
+            $data->timecreated = time();
+        }
+
+        if (empty($data->timemodified)) {
+            $data->timemodified = time();
+        }
+
+        if ($data->grade < 0) {
+            // Scale found, get mapping.
+            $data->grade = -($this->get_mappingid('scale', abs($data->grade)));
+        }
+
+        // Create the email instance.
         $newitemid = $DB->insert_record('email', $data);
-        // immediately after inserting "activity" record, call this
         $this->apply_activity_instance($newitemid);
     }
- 
-    protected function process_email_account($data) {
-        global $DB;
- 
-        $data = (object)$data;
-        $oldid = $data->id;
- 
-        $data->emailid = $this->get_new_parentid('email');
-        $data->userid = $this->get_mappingid('user', $data->userid);
-        
-        $newitemid = $DB->insert_record('email_account', $data);
-        $this->set_mapping('email_account', $oldid, $newitemid);
-    }
- 
-    protected function process_email_folder($data) {
-        global $DB;
-        $data = (object)$data;
-        $oldid = $data->id;
- 
-        $data->accountid = $this->get_mappingid('email_account', $data->accountid);
-        $data->timecreated = $this->apply_date_offset($data->timecreated);
-        
-        $newitemid = $DB->insert_record('email_folder', $data);
-        $this->set_mapping('email_folder', $oldid, $newitemid);
-    }
-    
-    protected function process_email_filter($data){
-        global $DB;
-        $data = (object)$data;
-        
-        $data->folderid = $this->get_mappingid('email_folder', $data->folderid);
-        
-        $newitemid = $DB->insert_record('email_filter', $data);
-    }
 
-
-    protected function process_email_subfolder($data) {
-        global $DB;
-        $data = (object)$data;
- 
-        $data->folderchildid = $this->get_mappingid('email_folder', $data->folderchildid);
-        $data->folderparentid = $this->get_mappingid('email_folder', $data->folderparentid);
-        
-        $newitemid = $DB->insert_record('email_subfolder', $data);
-        
-    }
-    
-    protected function process_email_mail($data) {
-        global $DB;
-        $data = (object)$data;
-        $oldid = $data->id;
-        
-        $data->accountid = $this->get_mappingid('email_account', $data->accountid);
-        $data->timecreated = $this->apply_date_offset($data->timecreated);
-        
-        $newitemid = $DB->insert_record('email_mail', $data);
-        $this->set_mapping('email_mail', $oldid, $newitemid, true);
-    }
-    
-    protected function process_email_send($data) {
-        global $DB;
-        $data = (object)$data;
-        
-        $data->accountid = $this->get_mappingid('email_account', $data->accountid);
-        $data->mailid = $this->get_new_parentid('email_mail');
-        
-        $newitemid = $DB->insert_record('email_send', $data);
-    }
-    
-    protected function process_email_foldermail($data) {
-        global $DB;
-        $data = (object)$data;
-        
-        $data->mailid = $this->get_mappingid('email_mail', $data->mailid);
-        $data->folderid = $this->get_mappingid('email_folder', $data->folderid);
-        
-        $newitemid = $DB->insert_record('email_foldermail', $data);
-    }
- 
+    /**
+     * Post-execution actions
+     */
     protected function after_execute() {
-        // Add email related files, no need to match by itemname (just internally handled context)
-        $this->add_related_files('mod_email', 'attachments', 'email_mail');
-        $this->add_related_files('mod_email', 'body', 'email_mail');
+        // Add email related files, no need to match by itemname (just internally handled context).
+        $this->add_related_files('mod_email', 'intro', null);
     }
 }
-?>

@@ -1,141 +1,58 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+
+/**
+ * English strings for email
+ *
+ * You can have a rather longer description of the file as well,
+ * if you like, and it can span multiple lines.
+ *
+ * @package    mod_email
+ * @copyright  2015 Your Name
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
 
 $string['modulename'] = 'Internal Email';
+$string['modulenameplural'] = 'Internal Emails';
+$string['modulename_help'] = 'Internal Email allows for email like communication between users enrolled in a course.';
+$string['emailfieldset'] = 'Custom example fieldset';
+$string['emailname'] = 'Internal Email';
+$string['emailname_help'] = 'This is the content of the help tooltip associated with the emailname field. Markdown syntax is supported.';
+$string['email'] = 'Internal Email';
+$string['pluginadministration'] = 'Internal Email administration';
 $string['pluginname'] = 'Internal Email';
-$string['modulenameplural'] = 'Internal Email';
-$string['emailname'] = 'Email';
-$string['maxsizeattachment'] = 'Maximum size of attachments';
-$string['mailbox'] = 'Mailbox';
-$string['newmail'] = 'Compose new email';
-$string['newfolderform'] = 'Create new folder';
-$string['newfilter'] = 'New filter';
-$string['anotherfile'] = 'Attach another file';
-$string['remove'] = 'remove';
-$string['clip'] = 'Attachment';
-$string['participants'] = 'Add Contacts';
-$string['body'] = 'Message';
-$string['sendok'] = 'Message sent';
-$string['sendfail'] = 'Error sending message';
-$string['createfolderok'] = 'Created folder';
-$string['modifyfolderok'] = 'Folder has been renamed';
-$string['nocreatefolder'] = 'Error Creating email folder.';
-$string['nomodifyfolder'] = 'Error renaming email folder.';
-$string['neverusers'] = 'No users sent';//?
-$string['removemail'] = 'Delete';
-$string['toread'] = 'Mark as read';
-$string['tounread'] = 'Mark as unread';
-$string['whatdo']= 'Do with selected messages:';
-$string['ok'] = 'Ok';
-$string['removeok'] = 'Message removed';
-$string['removefolderok'] = 'Folder removed';
-$string['removedraftfail'] = 'Failed to remove draft.';
-$string['toreadok'] = 'Messages mark readed';
-$string['markreadfail'] = 'Error marking message read.';
-$string['tounreadok'] = 'Messages mark unreaded';
-$string['namenewfolder'] = 'Name of new folder';
-$string['linkto'] = 'Subfolder of';
-$string['inbox'] = 'Inbox';
-$string['sendbox'] = 'Sent';
-$string['trash'] = 'Trash';
-$string['inbox']= 'Inbox';
-$string['havesubfolders']= 'This folder has subfolders. You must first remove any subfolders';
-$string['to']= 'To';
-$string['folders'] = 'Folders';
-$string['removefail'] = 'Failed removing messages';
-$string['movetofolder'] = 'Move selected messages to';
-$string['moveok'] = 'Messages moved';
-$string['movefail'] = 'Failed moving messages';
+$string['to'] = 'To';
 $string['from'] = 'From';
-$string['for']= 'To';
-$string['attachment']= 'Attachment';
-$string['attachments']= 'Attachments';
-$string['re'] = 'Re:';
-$string['fw'] = 'Fw:';
-$string['wrote'] = 'wrote';
-$string['on'] = 'On';
-$string['searchword'] = 'Messages searched for';
-$string['alertallcourse'] = 'Are you sure you want to send to all students in the class?';
-$string['nosubject'] = 'You must specify a subject for this message';
-$string['nosenders'] = 'You must specify at least one recipient';
-$string['editfolders'] = 'Edit folders';
-$string['removefolder'] = 'Remove folder';
-$string['renamefolder'] = 'Rename folder';
-$string['folderhavemails'] = 'This folder contains messages. You must remove all messages before you can remove this folder';
-$string['changeme'] = 'Update folder';
-$string['accounts'] = 'Accounts';
-$string['mails'] = 'Messages';
-$string['mailsperpage'] = 'How many messages per page';
-$string['draft'] = 'Draft';
-$string['savedraft'] = 'Save Now';
-$string['draftok'] = 'Mail has been saved';
-$string['draftfail'] = 'Error saving draft';
-$string['cleantrash'] = 'Empty';
-$string['cleantrashok'] = 'Trash was emptied';
-$string['cleantrashfail'] = 'Failed emptying trash';
-$string['information'] = 'Email module information';
-$string['failcreatingnewaccounts'] = 'Failed when creating new accounts in course ';
-$string['faildeletingaccounts'] = 'Failed when deleting accounts in course ';
-$string['finishcreatingnewaccounts'] = 'Finished creating missing accounts';
-$string['creatingnewaccountsok'] = 'Created $count accounts';
-$string['showprincipalcourse'] = 'Show principal course';
-$string['noshowprincipalcourse'] = 'Don\'t show principal course';
-$string['configdisplayprincipalcourse'] = 'Configure if display pricipal course in blocks';
-$string['confignumberdisplaycourses'] = 'Chooses the number of courses to visualize in the course block. When no choose all courses, only show number <= who has unread mails';
-
-$string['editfolder'] = 'Edit folders';
-$string['noaccount'] = 'Failed at getting the current user\'s account for this email module.';
-$string['nosubfolders'] = 'No subfolders exist, Do you want to create a new folder?';
-
-$string['check'] = 'Check';//?
 $string['subject'] = 'Subject';
-$string['from'] = 'From';
 $string['date'] = 'Date';
-$string['history'] = 'History';
-$string['picture'] = 'Picture';
-$string['attachment']= 'Attachment';
-$string['message']= 'Message';
-$string['send']= 'Send';
-$string['cancel']= 'Cancel';
-$string['sent']= 'Sent';
-$string['compose']= 'Compose';
-$string['deleted']= 'Deleted';
-$string['options']= 'Options';
-$string['messages'] = 'Messages';
-$string['reply'] = 'Reply';
-$string['forward'] = 'Forward';
-$string['find'] = 'find';
-$string['more contacts'] = 'more contacts';
-$string['marcar leido'] = 'Mark as read';
-$string['marcar no leido'] = 'Mark as non read';
-$string['next'] = 'Next';
-$string['previous'] = 'Previous';
-$string['replyall'] = 'Reply all';
-$string['error'] = 'Error';
-$string['received'] = 'Received';
-$string['read'] = 'Read';
-$string['body'] = 'Body';
+
+$string['displayperpage'] = 'Display per page';
+$string['withselected'] = 'With selected';
 $string['folder'] = 'Folder';
+$string['goto'] = 'Go to folder';
+$string['moveto'] = 'Move to';
 
-$string['addusersto'] = 'To';
-$string['cc'] = 'Cc';
-$string['bcc'] = 'Bcc';
-$string['selectedusersremove'] = 'Remove';
-$string['accept'] = 'Accept';
-$string['change'] = 'Change';
-$string['selectaction'] = 'Choose recipients of this message';
-$string['addcc'] = 'Show CC';
-$string['addbcc'] = 'Show BCC';
-$string['nocoursemodid'] = 'Course Module ID was not found.';
-$string['nocourseid'] = 'Course ID was not found.';
-$string['noemailinstance'] = 'Instance of email was found.';
-$string['nocourseemail'] = 'No email module was found for this course.';
-$string['noenable'] = 'Failed to enable email';
-$string['alreadyenabled'] = 'Internal Email was already enabled for this course. Only one Internal Email activity link is allowed per course.';
-$string['errattach'] = 'Error saving attachmentfiles';
-$string['errcopyattach'] = 'Failed when copying attachments';
-$string['nomailid'] = 'Mail id not found.';
-$string['norootfolder'] = 'Root parent folder not found.';
-$string['nofolder'] = 'Folder was not found.';
-$string['pluginadministration'] = 'Plugin Administration';
+$string['errormissingid'] = 'Error: You must specify a course_module ID or an instance ID.';
+$string['errormessageids'] = 'Error: You must specify a folder ID and a message ID.';
+$string['errornofolder'] = 'Error: The instance ID or folder ID is not valid for the current user.';
 
-?>
+$string['addsubfolder'] = 'Add folder';
+$string['editsubfolder'] = 'Edit folder';
+$string['save'] = 'Save';
+$string['foldernameempty'] = 'A folder name is required.';

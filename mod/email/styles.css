@@ -1,57 +1,125 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
 /* 
-    Document   : style
-    Created on : Oct 26, 2011, 2:10:33 PM
+    Created on : Apr 11, 2016, 3:25:50 PM
     Author     : switlik
-    Description:
-        Purpose of the stylesheet follows.
 */
 
-/* 
-   TODO customize this sample style
-   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
-*/
-body#page-mod-email-view {
-    min-width: 1000px;
-}
-
-body#page-mod-email-view .mform .fitem .fitemtitle {
-    width: 115px;
-}
-
-body#page-mod-email-view .mform .fitem .felement {
-    margin-left: 118px;
-    width: auto;
-}
-
-body#page-mod-email-view .filemanager-container{
-    width: 432px;
-}
-
-.path-mod-email div.column {
+div.emailfoldermenu {
     display: inline-block;
 }
 
-.path-mod-email .inputmail {
-    width: 512px;
+div.emailmenuoption {
+    display: inline-block;
+    margin-right: 25px;
 }
 
-.path-mod-email .legendmail {
-    width: 180px;
+div.emailmenuoption select {
+    margin-left: 0.4em;
 }
 
-body#page-mod-email-view #region-pre {
-    display:none;
+div.emailmenuoption label {
+    display: inline;
 }
 
-body#page-mod-email-view #page-content #region-main {
-    margin-left: 0;
-    margin-right: 0;
+
+div.emailmessage .mitem {
+    display: table;
 }
 
-body#page-mod-email-participants div#frametop {
-    min-width: 425px;
+div.emailmessage .mitemtitle {
+    float: left;
+    text-align: right;
+    width: 75px;
 }
 
-.modtype_email .editing_duplicate {
-    display:none;
+div.emailmessage .mitemtitle label {
+    display: inline-block;
+    font-weight: bold;
+}
+
+div.emailmessage .melement {
+    margin-left: 95px;
+}
+
+div.emailmessage .menulink {
+    display: inline-block;
+    margin-left: 15px;
+    margin-right: 5px;
+    margin-bottom: 10px;
+}
+
+div.emailfoldersitem {
+    margin-left: 30px;
+    margin-right: 5px;
+    margin-bottom: 10px;
+}
+
+div.emailfoldersitem label {
+    display: inline-block;
+    width: 125px;
+    font-weight: bold;
+}
+
+div.emailfoldersitem .folderoptions {
+    display: inline;
+}
+
+div.emailfoldermanagement .menulink {
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+div.emailfoldermanagement .mform .fitem div.fitemtitle {
+    width: 125px;
+}
+
+div.emailfoldermanagement .mform .fitem div.felement {
+    margin-left: 145px;
+}
+
+#page-mod-email-folders #fgroup_id_buttonar {
+    display: inline-block;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border: 0;
+}
+
+#page-mod-email-folders .mform .fitem {
+    margin-bottom: 0;
+}
+
+#page-mod-email-folders .mform {
+    padding-top: 5px;
+    border: solid 1px #D9D9D9;
+}
+
+#page-mod-email-view .mform .fitem {
+    display: inline-block;
+    margin-top: 5px;
+}
+
+#page-mod-email-view .mform .fitem .fitemtitle {
+    width: 105px;
+}
+
+#page-mod-email-view .mform .fitem .felement {
+    margin-left: 110px;
+}
+
+#page-mod-email-view #fitem_id_moveto .fitemtitle{
+    width: 70px;
+}
+
+#page-mod-email-view #fitem_id_moveto .felement{
+    margin-left: 75px;
+}
+
+#page-mod-email-view #fitem_id_gobutton .felement{
+    margin-left: 10px;
 }
