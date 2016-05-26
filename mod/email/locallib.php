@@ -88,13 +88,64 @@ function email_get_recipients($messageid) {
  * 
  */
 function email_menu_gotofolder($url, $emailid, $folderid) {
-    global $DB, $USER, $OUTPUT;
-    $params = array('userid' => $USER->id, 'emailid' => $emailid, 'deleted' => 0);
-    $userfolders = $DB->get_records_menu('email_folder', $params, "parenttype, parentfolderid, name", "id, name");
-    $select = new single_select($url, 'f', $userfolders, $folderid, null, "gotofolderform");
+    global $OUTPUT;
+    
+    $usersfolders = email_menu_get_usersfolders($emailid);
+    $options = array();
+    foreach ($usersfolders as $usersfolder) {
+        $name = '';
+        for ($i=0; $i < $usersfolder->depth; $i++){
+            $name .= " - ";
+        }
+        $name .= $usersfolder->name;
+        $options[$usersfolder->id] = $name;
+    }
+    
+    $select = new single_select($url, 'f', $options, $folderid, null, "gotofolderform");
     $select->set_label(get_string('goto', 'email'));
     $select->class = "emailmenuoption";
     return $OUTPUT->render($select);
+}
+
+function email_menu_movetofolders($url, $emailid, $folderid) {
+    global $OUTPUT;
+
+    $usersfolders = email_menu_get_usersfolders($emailid);
+    $options = array();
+    foreach ($usersfolders as $usersfolder) {
+        $name = '';
+        for ($i=0; $i < $usersfolder->depth; $i++){
+            $name .= " - ";
+        }
+        $name .= $usersfolder->name;
+        $options[$usersfolder->id] = $name;
+    }
+
+    $select = new single_select($url, 'f', $options, $folderid, null, "gotofolderform");
+    $select->set_label(get_string('goto', 'email'));
+    $select->class = "emailmenuoption";
+    return $OUTPUT->render($select);
+}
+
+function email_menu_get_usersfolders($emailid, $parentfolderid = 0, $depth = 0) {
+    global $DB, $USER;
+
+    $params = array('userid' => $USER->id, 'emailid' => $emailid, 'deleted' => 0, 'parentfolderid' => $parentfolderid);
+    $folders = array_values($DB->get_records('email_folder', $params, "name", "id, name"));
+
+    $pos = 0;
+    foreach ($folders as $k => $folder) {
+        $folder->depth = $depth;
+        $subfolders = email_menu_get_usersfolders($emailid, $folder->id, ($depth + 1));
+        $count = count($subfolders);
+        $pos++;
+        if ($count > 0) {
+            array_splice($folders, $pos, 0, $subfolders);
+            $pos += $count;
+        }
+    }
+    
+    return $folders;
 }
 
 /**
@@ -248,7 +299,7 @@ function email_get_managefolders($emailid, $parentfolderid, $baseurl, $f, $actio
         $content = "";
         
         // If not editting or folder is not selected.
-         if ($f == $folder->id && $action == "edit")  {
+         if (($f == $folder->id) && $action == "edit")  {
             $baseurl->param('action', $action);
             $mform = new \mod_email\edit_folder_form($baseurl);
             if (!$mform->is_cancelled()) {
@@ -265,6 +316,8 @@ function email_get_managefolders($emailid, $parentfolderid, $baseurl, $f, $actio
                     $mform->set_data(array('foldername' => $folder->name));
                 }
                 $content = $mform->render();
+            } else {
+                $content = email_outputfolderrow($folder, $baseurl);
             }
         } else if ($f == $folder->id && $action == "delete") {
             $confirm = optional_param('confirm', 0, PARAM_INT); // Confirmation of the delete action.
@@ -299,22 +352,7 @@ function email_get_managefolders($emailid, $parentfolderid, $baseurl, $f, $actio
                 redirect($baseurl);
             }
         } else {
-            $content = "<label>" . $folder->name . "</label>";
-
-            // Edit this folder.
-            $content .= $OUTPUT->container_start("folderoptions");
-            $baseurl->param('action', 'add');
-            $content .= $OUTPUT->action_icon($baseurl, new pix_icon('t/add', get_string('add'), '', array('class' => 'iconsmall')));
-            $content .= $OUTPUT->container_end();
-
-            if ($folder->type == EMAIL_FOLDER) {
-                // Edit a folder.
-                $baseurl->param('action', 'edit');
-                $content .= $OUTPUT->action_icon($baseurl, new pix_icon('t/edit', get_string('settings'), '', array('class' => 'iconsmall')));
-                // Delete a folder.
-                $baseurl->param('action', 'delete');
-                $content .= $OUTPUT->action_icon($baseurl, new pix_icon('t/delete', get_string('delete'), '', array('class' => 'iconsmall')));
-            }
+            $content = email_outputfolderrow($folder, $baseurl);
         }
         
         
@@ -341,6 +379,7 @@ function email_get_managefolders($emailid, $parentfolderid, $baseurl, $f, $actio
                             $data->name = trim($fromform->foldername);
                             $data->userid = $USER->id;
                             $data->parentfolderid = $folder->id;
+                            $data->parentfoldertype = $folder->parentfoldertype;
                             $data->emailid = $emailid;
                             $DB->insert_record("email_folder", $data);
                         }
@@ -358,6 +397,28 @@ function email_get_managefolders($emailid, $parentfolderid, $baseurl, $f, $actio
     return $foldershtml;
 }
 
+
+function email_outputfolderrow($folder, $baseurl) {
+    global $OUTPUT;
+
+    $content = "<label>" . $folder->name . "</label>";
+
+    // Edit this folder.
+    $content .= $OUTPUT->container_start("folderoptions");
+    $baseurl->param('action', 'add');
+    $content .= $OUTPUT->action_icon($baseurl, new pix_icon('t/add', get_string('add'), '', array('class' => 'iconsmall')));
+    $content .= $OUTPUT->container_end();
+
+    if ($folder->type == EMAIL_FOLDER) {
+        // Edit a folder.
+        $baseurl->param('action', 'edit');
+        $content .= $OUTPUT->action_icon($baseurl, new pix_icon('t/edit', get_string('settings'), '', array('class' => 'iconsmall')));
+        // Delete a folder.
+        $baseurl->param('action', 'delete');
+        $content .= $OUTPUT->action_icon($baseurl, new pix_icon('t/delete', get_string('delete'), '', array('class' => 'iconsmall')));
+    }
+    return $content;
+}
 
 
 function email_delete_folder($folderid) {

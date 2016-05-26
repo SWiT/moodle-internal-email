@@ -57,7 +57,7 @@ $foldershtml = email_get_managefolders($email->id, EMAIL_ROOT_FOLDER, $baseurl, 
 // Output starts here.
 echo $OUTPUT->header();
 
-    // View message.
+// View folders.
 echo $OUTPUT->container_start("emailfoldermanagement");
     echo $OUTPUT->heading($course->shortname . ": Manage Folders"). "<hr/>";
     $backurl = new moodle_url("view.php", array('id' => $cm->id));

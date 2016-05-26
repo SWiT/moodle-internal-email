@@ -28,20 +28,32 @@ class select_messages_form extends \moodleform {
         $mform->addElement('html', $data);
 
         // Get the options based on if this is a Trash folder or not.
-
-        $options = array( ""        => ""
-                        , "read"    => "Mark Read"
-                        , "unread"  => "Mark Unread"
-                        , "trash"   => "Send to Trash"
-                        , "move"    => "Move to..."
-                    );
+        $folder = $DB->get_record('email_folder', array('id' => $folderid), '*', MUST_EXIST);
+        if ($folder->parenttype == EMAIL_TRASH) {
+            $options = array( ""        => ""
+                            , "read"    => "Mark Read"
+                            , "unread"  => "Mark Unread"
+                            , "delete"  => "Delete"
+                            , "move"    => "Move to..."
+                        );
+        } else {
+            $options = array( ""        => ""
+                            , "read"    => "Mark Read"
+                            , "unread"  => "Mark Unread"
+                            , "trash"   => "Send to Trash"
+                            , "move"    => "Move to..."
+                        );
+        }
         $mform->addElement('select', 'withselected', get_string('withselected', 'email'), $options);
 
         $userfolders = array('' => '');
-        $params = array('userid' => $USER->id, 'emailid' => $emailid, 'type' => EMAIL_INBOX);
+
+        $params = array('userid' => $USER->id, 'emailid' => $emailid, 'parenttype' => EMAIL_INBOX, 'deleted' => 0);
         $inboxfolders = $DB->get_records_menu('email_folder', $params, "name", "id, name");
-        $params['type'] = EMAIL_TRASH;
+
+        $params['parenttype'] = EMAIL_TRASH;
         $trashfolders = $DB->get_records_menu('email_folder', $params, "name", "id, name");
+
         $userfolders = $userfolders + $inboxfolders + $trashfolders;
         $mform->addElement('select', 'moveto', get_string('moveto', 'email'), $userfolders);
 
