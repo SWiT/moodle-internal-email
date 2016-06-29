@@ -40,7 +40,14 @@ $string['pluginname'] = 'Internal Email';
 $string['to'] = 'To';
 $string['from'] = 'From';
 $string['subject'] = 'Subject';
+$string['body'] = 'Body';
+$string['attachments'] = 'Attachments';
 $string['date'] = 'Date';
+$string['sent'] = 'Sent';
+$string['send'] = 'Send';
+
+$string['selectrecipient'] = 'Select a recipient';
+$string['allparticipants'] = '(All participants)';
 
 $string['displayperpage'] = 'Display per page';
 $string['withselected'] = 'With selected';

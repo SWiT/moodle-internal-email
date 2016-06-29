@@ -75,12 +75,12 @@ echo $OUTPUT->heading($course->shortname . ": " .$folder->name. ": " .$message->
 
 email_menu_messageactions($folder->id, $p, $message->id);
 
-echo email_messageelement("From", email_get_sender($message->id));
-echo email_messageelement("To", email_get_recipients($message->id));
-echo email_messageelement("Sent", userdate($message->timesent));
+echo email_messageelement(get_string('from', 'email'), email_get_sender($message->id));
+echo email_messageelement(get_string('to', 'email'), email_get_recipients($message->id));
+echo email_messageelement(get_string('sent', 'email'), userdate($message->timesent));
 
-echo email_messageelement("Subject", $message->subject);
-echo email_messageelement("Body", $message->body);
+echo email_messageelement(get_string('subject', 'email'), $message->subject);
+echo email_messageelement(get_string('body', 'email'), $message->body);
 
 
 if ($previd = email_get_prev_messageid($folder, $message->id)) {

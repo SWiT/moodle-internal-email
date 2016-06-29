@@ -50,16 +50,18 @@ $PAGE->set_heading(format_string($course->fullname));
 
 $PAGE->navbar->add("Compose New Message");
 
+$composehtml = email_get_composehtml($cm, $course, $email);
+
 // Output starts here.
 echo $OUTPUT->header();
 
-    // View message.
+// View message.
 echo $OUTPUT->container_start("emailfoldermanagement");
     echo $OUTPUT->heading($course->shortname . ": Compose New Message"). "<hr/>";
     $backurl = new moodle_url("view.php?id=".$cm->id);
     echo $OUTPUT->container($OUTPUT->action_link($backurl, "Back"), "menulink");
 
-    
+    echo $composehtml;
 
     echo $OUTPUT->container($OUTPUT->action_link($backurl, "Back"), "menulink");
 echo $OUTPUT->container_end();
@@ -68,3 +70,31 @@ echo $OUTPUT->container_end();
 
 // Finish the page.
 echo $OUTPUT->footer();
+
+/**
+ * Return the manage folders interface html.
+ *
+ * @package mod_email
+ *
+ */
+function email_get_composehtml($cm, $course, $email) {
+    global $DB, $USER, $OUTPUT ;
+    $composehtml = "";
+
+    $baseurl = new moodle_url('/mod/email/compose.php', array('id' => $cm->id));
+
+    $coursecontext = context_course::instance($course->id);
+    $userlist = get_enrolled_users($coursecontext, '', 0, 'u.*', 'lastname');
+    $tousers = array(0 => get_string('allparticipants', 'email'),);
+    foreach ($userlist as $user) {
+        $tousers[$user->id] = fullname($user);
+    }
+        
+    $customdata = array('tousers' => $tousers);
+    $mform = new \mod_email\compose_message_form($baseurl, $customdata);
+
+    $composehtml .= $mform->render();
+    $composehtml .= "<br/>";
+    
+    return $composehtml;
+}
