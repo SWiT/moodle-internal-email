@@ -35,8 +35,7 @@ class compose_message_form extends \moodleform {
         $mform->addElement('editor', 'body', get_string("body", "email"));
         $mform->setType('body', PARAM_RAW);
 
-        $label = get_string('attachments', 'email');
-        $mform->addElement('filemanager', 'attachments', $label);
+        $mform->addElement('filemanager', 'attachments', get_string('attachments', 'email'));
 
         $this->add_action_buttons(true, get_string('send', 'email'));
     }

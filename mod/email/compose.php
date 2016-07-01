@@ -81,8 +81,6 @@ function email_get_composehtml($cm, $course, $email) {
     global $DB, $USER, $OUTPUT ;
     $composehtml = "";
 
-    $baseurl = new moodle_url('/mod/email/compose.php', array('id' => $cm->id));
-
     $coursecontext = context_course::instance($course->id);
     $userlist = get_enrolled_users($coursecontext, '', 0, 'u.*', 'lastname');
     $tousers = array(0 => get_string('allparticipants', 'email'),);
@@ -91,7 +89,18 @@ function email_get_composehtml($cm, $course, $email) {
     }
         
     $customdata = array('tousers' => $tousers);
-    $mform = new \mod_email\compose_message_form($baseurl, $customdata);
+    $composeurl = new moodle_url('/mod/email/compose.php', array('id' => $cm->id));
+    $mform = new \mod_email\compose_message_form($composeurl, $customdata);
+
+    if (!$mform->is_cancelled()) {
+        if ($formdata = $mform->get_data()) {
+            echo "!!!<br/>";
+        }
+    } else {
+        // Cancelled.
+        $viewfoldersurl = new moodle_url('/mod/email/view.php', array('id' => $cm->id));
+        redirect($viewfoldersurl);
+    }
 
     $composehtml .= $mform->render();
     $composehtml .= "<br/>";
