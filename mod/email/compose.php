@@ -81,29 +81,67 @@ function email_get_composehtml($cm, $course, $email) {
     global $DB, $USER, $OUTPUT ;
     $composehtml = "";
 
+    // Get a list of all users in the course.
     $coursecontext = context_course::instance($course->id);
     $userlist = get_enrolled_users($coursecontext, '', 0, 'u.*', 'lastname');
-    $tousers = array(0 => get_string('allparticipants', 'email'),);
+    $contacts = array(0 => get_string('allparticipants', 'email'),);
     foreach ($userlist as $user) {
-        $tousers[$user->id] = fullname($user);
+        $contacts[$user->id] = fullname($user);
     }
-        
-    $customdata = array('tousers' => $tousers);
-    $composeurl = new moodle_url('/mod/email/compose.php', array('id' => $cm->id));
-    $mform = new \mod_email\compose_message_form($composeurl, $customdata);
 
-    if (!$mform->is_cancelled()) {
-        if ($formdata = $mform->get_data()) {
-            echo "!!!<br/>";
-        }
-    } else {
-        // Cancelled.
+    // Determine if new message, reply, reply all, or forward.
+    $message = new stdClass();
+    $message->to = array();
+    $message->subject = '';
+    $message->body = '';
+    $message->bodyformat = editors_get_preferred_format();
+    $message->bodytrust  = 0;
+    
+    $composeurl = new moodle_url('/mod/email/compose.php', array('id' => $cm->id));
+    $mform = new \mod_email\compose_message_form($composeurl, array('contacts' => $contacts));
+
+    if ($mform->is_cancelled()) {
+        // The form was cancelled.
         $viewfoldersurl = new moodle_url('/mod/email/view.php', array('id' => $cm->id));
         redirect($viewfoldersurl);
+    } else if ($formdata = $mform->get_data()) {
+
+        // The form was submitted with data.
+        echo "!!!<br/>";
+
+    } else {
+
+        // Set the default data.
+        $mform->set_data($message);
+
+        // Display the form.
+        $composehtml .= $mform->render();
     }
 
-    $composehtml .= $mform->render();
+    
     $composehtml .= "<br/>";
     
     return $composehtml;
+}
+
+
+
+function email_get_form_options($email, $context){
+    $bodyoptions = array('subdirs'=>0
+                    , 'maxbytes'=>$email->maxbytes
+                    , 'maxfiles'=>50
+                    , 'changeformat'=>0
+                    , 'context'=>$context
+                    , 'noclean'=>0
+                    , 'trusttext'=>true
+                    , 'enable_filemanagement'=>true
+                    );
+
+    $attachmentoptions = array('subdirs'=>0
+                            , 'maxfiles'=>50
+                            , 'maxbytes'=>$email->maxbytes
+                            , 'context'=>$context
+                            );
+
+    return array('attachmentsoptions'=>$attachmentoptions, 'bodyoptions'=>$bodyoptions);
 }

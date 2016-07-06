@@ -21,12 +21,13 @@ class compose_message_form extends \moodleform {
         global $CFG;
         $mform =& $this->_form; // Don't forget the underscore!
 
-        $tousers = $this->_customdata['tousers'];
+        $contacts = $this->_customdata['contacts'];
+
         $options = array(
             'multiple' => true,
             'noselectionstring' => get_string('selectrecipient', 'email'),
         );
-        $mform->addElement('autocomplete', 'to', get_string('to', 'email'), $tousers, $options);
+        $mform->addElement('autocomplete', 'to', get_string('to', 'email'), $contacts, $options);
 
         
         $mform->addElement('text', 'subject', get_string('subject', 'email'));
