@@ -137,14 +137,7 @@ $PAGE->set_heading(format_string($course->fullname));
 
 if (!isset($folder)) {
     // View the users inbox.
-    $params = array('userid' => $USER->id, 'emailid' => $email->id, 'type' => EMAIL_INBOX);
-    try {
-        $folder  = $DB->get_record('email_folder', $params, '*', MUST_EXIST);
-    } catch (Exception $e) {
-        // Error the inbox for the user was not found.
-        $url = new moodle_url("/user/index.php?id=".$course->id); // Course participants list.
-        print_error('errornofolder', 'email', $url);
-    }
+    $folder = email_get_users_inbox($USER->id, $email->id, $course->id);
 }
 
 $folderurl = new moodle_url('/mod/email/view.php', array('f' => $folder->id));

@@ -90,12 +90,7 @@ function email_get_composehtml($cm, $course, $email) {
     }
 
     // Determine if new message, reply, reply all, or forward.
-    $message = new stdClass();
-    $message->to = array();
-    $message->subject = '';
-    $message->body = '';
-    $message->bodyformat = editors_get_preferred_format();
-    $message->bodytrust  = 0;
+
     
     $composeurl = new moodle_url('/mod/email/compose.php', array('id' => $cm->id));
     $mform = new \mod_email\compose_message_form($composeurl, array('contacts' => $contacts));
@@ -107,12 +102,47 @@ function email_get_composehtml($cm, $course, $email) {
     } else if ($formdata = $mform->get_data()) {
 
         // The form was submitted with data.
-        echo "!!!<br/>";
+
+        // Add the new message.
+        $message = new stdClass();
+        $message->emailid     = $email->id;
+        $message->timecreated = time();
+        $message->subject     = $formdata->subject;
+        $message->body        = $formdata->body['text'];
+        $message->bodyformat  = $formdata->body['format'];;
+        $message->bodytrust   = 0;
+        $message->status      = 'sent';
+        $message->timesent    = time();
+        $messageid = $DB->insert_record('email_message', $message);
+
+        // Add the message recipients.
+        foreach ($formdata->to as $touser) {
+            $messageusers = new stdClass();
+            $messageusers->messageid = $messageid;
+            $messageusers->type = 'to';
+            $messageusers->userid = $touser;
+            $folder = email_get_users_inbox($touser, $email->id, $course->id);
+            $messageusers->folderid = $folder->id;
+            $messageusers->viewed = 0;
+            $messageusers->timeviewed = 0;
+            $messageusers->deleted = 0;
+            $DB->insert_record('email_message_users', $messageusers);
+        }
+
+        // Return to the users inbox
+        $viewfoldersurl = new moodle_url('/mod/email/view.php', array('id' => $cm->id));
+        redirect($viewfoldersurl);
 
     } else {
 
-        // Set the default data.
-        $mform->set_data($message);
+        // Set the default data?
+        $composeform = new stdClass();
+        $composeform->to = array();
+        $composeform->subject = '';
+        $composeform->body =    '';
+        $composeform->bodyformat = editors_get_preferred_format();
+        $composeform->bodytrust  = 0;
+        $mform->set_data($composeform);
 
         // Display the form.
         $composehtml .= $mform->render();

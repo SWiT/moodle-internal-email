@@ -44,9 +44,13 @@ class compose_message_form extends \moodleform {
     //Custom validation should be added here
     function validation($data, $files) {
         $errors = parent::validation($data, $files);
+        
+        if (empty($data['to'])) {
+            $errors['norecipient'] = get_string('norecipient','email');
+        }
 
-        if (empty(trim($data['foldername']))) {
-            $errors['foldername'] = get_string('foldernameempty','email');
+        if (empty(trim($data['body']['text']))) {
+            $errors['bodyempty'] = get_string('bodyempty','email');
         }
 
         return $errors;

@@ -63,3 +63,5 @@ $string['addsubfolder'] = 'Add folder';
 $string['editsubfolder'] = 'Edit folder';
 $string['save'] = 'Save';
 $string['foldernameempty'] = 'A folder name is required.';
+$string['bodyempty'] = 'A message body is required.';
+$string['norecipient'] = 'No recipient was selected.';

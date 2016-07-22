@@ -482,3 +482,16 @@ function email_get_perpage() {
     }
     return $perpage;
 }
+
+function email_get_users_inbox($userid, $emailid, $courseid) {
+    global $DB;
+    try {
+        $params = array('userid' => $userid, 'emailid' => $emailid, 'type' => EMAIL_INBOX);
+        $folder  = $DB->get_record('email_folder', $params, '*', MUST_EXIST);
+    } catch (Exception $e) {
+        // Error the inbox for the user was not found.
+        $url = new moodle_url("/user/index.php?id=".$courseid); // Course participants list.
+        print_error('errornofolder', 'email', $url);
+    }
+    return $folder;
+}
