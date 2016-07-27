@@ -139,12 +139,19 @@ function xmldb_email_upgrade($oldversion) {
     if($oldversion < 2015091700){
         // Migrate the mail data to the new data structure.
 
-        // First Fix the duplicate email_foldermail records.
-        $sql = "SELECT FM.mailid, FM.folderid
-                FROM {email_foldermail} FM
+        // First remove the duplicate email_foldermail records.
+        $sql = "SELECT MIN(FM.id) as id, FM.mailid, FM.folderid, COUNT(FM.id)
+                FROM mdl_email_foldermail FM
                 GROUP BY FM.mailid, FM.folderid
                 HAVING COUNT(FM.mailid) > 1
+                ORDER BY FM.mailid
                 ;";
+        $data = $DB->get_records_sql($sql);
+        foreach($data as $d) {
+            //Delete all but the first foldermail record
+            $where = 'id != '.$d->id.' AND mailid = '.$d->mailid.' AND folderid = '.$d->folderid;
+            $DB->delete_records_select('email_foldermail', $where);
+        }
 
 
         //Get all the mail records (messages).
