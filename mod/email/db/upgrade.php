@@ -212,6 +212,11 @@ function xmldb_email_upgrade($oldversion) {
                     }
                 }
             }
+            if (empty($folder) && count($folders) == 1) {
+                // The sender moved the sent message to a subfolder of the INBOX or other root folder.
+                $folder = array_shift($folders); 
+            }
+
 
             if ($folder->name == 'Draft') {
                 $message->status = 'draft';
