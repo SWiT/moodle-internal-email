@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/email/db" VERSION="2016050600" COMMENT="XMLDB file for Moodle mod/email"
+<XMLDB PATH="mod/email/db" VERSION="2016072700" COMMENT="XMLDB file for Moodle mod/email"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -26,6 +26,8 @@
         <FIELD NAME="emailid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="subject" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="emailid"/>
         <FIELD NAME="body" TYPE="text" LENGTH="big" NOTNULL="false" SEQUENCE="false" PREVIOUS="subject"/>
+        <FIELD NAME="bodyformat" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
+        <FIELD NAME="bodytrust" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="status" TYPE="char" LENGTH="5" NOTNULL="true" SEQUENCE="false" PREVIOUS="body"/>
         <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="timesent" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>

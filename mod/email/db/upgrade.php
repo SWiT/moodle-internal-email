@@ -32,6 +32,23 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
+ * A helper function for getting the root parent folder from the old DB schema
+ *
+ * @param int $folderid
+ * @return object of the folders parent.
+ */
+function email_get_root_parent_folder($folderid) {
+    global $DB;
+    if ($subfolder = $DB->get_record('email_subfolder', array('folderchildid' => $folderid))) {
+        $rf = email_get_root_parent_folder($subfolder->folderparentid);
+    } else {
+        // Root folder
+        $rf = $DB->get_record('email_folder', array('id' => $folderid));
+    }
+    return $rf;
+}
+
+/**
  * Execute email upgrade from the given old version
  *
  * @param int $oldversion
@@ -121,12 +138,20 @@ function xmldb_email_upgrade($oldversion) {
 
     if($oldversion < 2015091700){
         // Migrate the mail data to the new data structure.
-        
+
+        // First Fix the duplicate email_foldermail records.
+        $sql = "SELECT FM.mailid, FM.folderid
+                FROM {email_foldermail} FM
+                GROUP BY FM.mailid, FM.folderid
+                HAVING COUNT(FM.mailid) > 1
+                ;";
+
+
         //Get all the mail records (messages).
         $mailrecords = $DB->get_recordset('email_mail');
         foreach ($mailrecords as $mail) {
             $message = new stdClass();
-            $message->id            = $mail->id;
+            $message->id = $mail->id;
             
             // Get the mail message's emailid.
             $sql = "SELECT M.id, E.id as emailid
@@ -147,7 +172,7 @@ function xmldb_email_upgrade($oldversion) {
             $message->timecreated   = $mail->timecreated;
             
             // Get the sender's message folder id and name.
-            $sql = "SELECT M.id, F.id as folderid, F.name as foldername
+            $sql = "SELECT F.*
                     FROM {email_mail} M
                     JOIN {email_account} A
                       ON A.id = M.accountid
@@ -158,11 +183,30 @@ function xmldb_email_upgrade($oldversion) {
                     JOIN {email_folder} F
                       ON F.id = FM.folderid
                       AND F.accountid = M.accountid
-                      AND (F.isparenttype = 'sendbox' OR F.isparenttype = 'draft')
                     WHERE M.id = ?
                     ";
-            $data = $DB->get_record_sql($sql, array($mail->id));
-            if ($data->foldername == 'Draft') {
+            $folder = new stdClass();
+            $folders = $DB->get_records_sql($sql, array($mail->id));
+            // A user may have sent a message to themselves. Get the sent folder or the subfolder of it.
+            foreach($folders as $f){
+                if (is_null($f->isparenttype)) {
+                    // Not a parent type
+                    // Get the root parent
+                    $rf = email_get_root_parent_folder($f->id);
+                    if ($rf->isparenttype == 'sendbox' || $f->isparenttype == 'draft' || $f->isparenttype == 'trash') {
+                        $folder = $f;
+                        break;
+                    }
+                } else {
+                    // Parent Type
+                    if ($f->isparenttype == 'sendbox' || $f->isparenttype == 'draft' || $f->isparenttype == 'trash') {
+                        $folder = $f;
+                        break;
+                    }
+                }
+            }
+
+            if ($folder->name == 'Draft') {
                 $message->status = 'draft';
                 $message->timesent = 0;
             } else {
@@ -170,8 +214,12 @@ function xmldb_email_upgrade($oldversion) {
                 $message->timesent = $mail->timecreated;
             }
             
-            // Insert the new message.
-            $DB->insert_record_raw('email_message', $message);
+            $m = $DB->get_record('email_message', array('id' => $message->id));
+            if (empty($m)) {
+                // Insert the new message.
+                $DB->insert_record_raw('email_message', $message);
+            }
+            
 
             // Add the sender as a messageuser.
             if ($account = $DB->get_record('email_account', array("id" => $mail->accountid))) {
@@ -180,12 +228,22 @@ function xmldb_email_upgrade($oldversion) {
                 $messageuser->type  = "from";
                 $messageuser->userid = $account->userid;
 
-                $messageuser->folderid = $data->folderid;
+                $messageuser->folderid = $folder->id;
                 
                 $messageuser->viewed = 1;
                 $messageuser->timeviewed = $mail->timecreated;
                 $messageuser->deleted = 0;
-                $DB->insert_record_raw('email_message_users', $messageuser);
+                
+                //Insert the record if it doesn't exist already.
+                $params = array('messageid' => $messageuser->messageid
+                                , 'type' => $messageuser->type
+                                , 'userid' => $messageuser->userid
+                                , 'folderid' => $messageuser->folderid
+                                );
+                $mu = $DB->get_records('email_message_users', $params);
+                if (empty($mu)) {
+                    $DB->insert_record_raw('email_message_users', $messageuser);
+                }
             } else {
                 print_error("line: ".__LINE__." accountid: ".$mail->accountid." NOT FOUND.<br/>\n");
             }
@@ -209,6 +267,9 @@ function xmldb_email_upgrade($oldversion) {
                                   AND F.isparenttype != 'sendbox'
                                 WHERE M.id = ?
                                   AND F.accountid = ?";
+
+                        // A user may have sent a message to themselves. Get the inbox folder or the subfolder of it.
+
                         if ($message->timesent > 0 && $data = $DB->get_record_sql($sql, array($mail->id, $recipient->accountid))) {
                             $messageuser->folderid = $data->folderid;
                         } else if ($message->timesent == 0) {
@@ -223,7 +284,17 @@ function xmldb_email_upgrade($oldversion) {
                             $messageuser->timeviewed = 0;
                         }
                         $messageuser->deleted = 0;
-                        $DB->insert_record_raw('email_message_users', $messageuser);
+                        
+                        //Insert the record if it doesn't exist already.
+                        $params = array('messageid' => $messageuser->messageid
+                                        , 'type' => $messageuser->type
+                                        , 'userid' => $messageuser->userid
+                                        , 'folderid' => $messageuser->folderid
+                                        );
+                        $mu = $DB->get_records('email_message_users', $params);
+                        if (empty($mu)) {
+                            $DB->insert_record_raw('email_message_users', $messageuser);
+                        }
                     } else {
                         print_error("line: ".__LINE__." recipient accountid:".$recipient->accountid." not found.<br/>\n");
                     }
@@ -426,6 +497,23 @@ function xmldb_email_upgrade($oldversion) {
             }
         }
         upgrade_mod_savepoint(true, 2016050600, 'email');
+    }
+
+    if ($oldversion < 2016072700) {
+        // Add bodyformat and bodytrust columns to email_message table.
+        $table = new xmldb_table('email_message');
+
+        $field = new xmldb_field('bodyformat', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $field = new xmldb_field('bodytrust', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0);
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_mod_savepoint(true, 2016072700, 'email');
     }
 
     return true;
