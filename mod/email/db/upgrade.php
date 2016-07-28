@@ -112,7 +112,7 @@ function xmldb_email_upgrade($oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        $field = new xmldb_field('parentfolderid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0, 'isdefault');
+        $field = new xmldb_field('parentfolderid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0, 'isparenttype');
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
