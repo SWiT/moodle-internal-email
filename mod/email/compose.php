@@ -113,21 +113,15 @@ function email_get_composehtml($cm, $course, $email) {
         $message->bodytrust   = 0;
         $message->status      = 'sent';
         $message->timesent    = time();
-        $messageid = $DB->insert_record('email_message', $message);
+        $message->id = $DB->insert_record('email_message', $message);
 
-        // Add the message recipients.
-        foreach ($formdata->to as $touser) {
-            $messageusers = new stdClass();
-            $messageusers->messageid = $messageid;
-            $messageusers->type = 'to';
-            $messageusers->userid = $touser;
-            $folder = email_get_users_inbox($touser, $email->id, $course->id);
-            $messageusers->folderid = $folder->id;
-            $messageusers->viewed = 0;
-            $messageusers->timeviewed = 0;
-            $messageusers->deleted = 0;
-            $DB->insert_record('email_message_users', $messageusers);
-        }
+        if (isset($formdata->to)) { email_add_recipients($course->id, $email->id, $formdata->to, 'to', $message->id); }
+        if (isset($formdata->cc)) { email_add_recipients($course->id, $email->id, $formdata->cc, 'cc', $message->id); }
+        if (isset($formdata->bcc)) { email_add_recipients($course->id, $email->id, $formdata->bcc, 'bcc', $message->id); }
+
+        list($attachmentoptions, $bodyoptions) = email_get_form_options($email, $coursecontext);
+        $message = file_postupdate_standard_editor($message, 'body', $bodyoptions, $coursecontext, 'mod_email', 'bodyfiles', $message->id);
+        $message = file_postupdate_standard_filemanager($message, 'attachment', $attachmentoptions, $coursecontext, 'mod_email', 'attachmentfiles', $message->id);
 
         // Return to the users inbox
         $viewfoldersurl = new moodle_url('/mod/email/view.php', array('id' => $cm->id));
@@ -162,7 +156,22 @@ function email_get_composehtml($cm, $course, $email) {
     return $composehtml;
 }
 
-
+function email_add_recipients($courseid, $emailid, $userids, $type, $messageid) {
+    // Add the message recipients.
+    global $DB;
+    foreach ($userids as $userid) {
+        $messageusers = new stdClass();
+        $messageusers->messageid = $messageid;
+        $messageusers->type = $type;
+        $messageusers->userid = $userid;
+        $folder = email_get_users_inbox($userid, $emailid, $courseid);
+        $messageusers->folderid = $folder->id;
+        $messageusers->viewed = 0;
+        $messageusers->timeviewed = 0;
+        $messageusers->deleted = 0;
+        $DB->insert_record('email_message_users', $messageusers);
+    }
+}
 
 function email_get_form_options($email, $context){
     $bodyoptions = array('subdirs'=>0
