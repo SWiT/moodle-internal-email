@@ -91,7 +91,7 @@ function email_get_composehtml($cm, $course, $email) {
 
     // Determine if new message, reply, reply all, or forward.
 
-    
+   
     $composeurl = new moodle_url('/mod/email/compose.php', array('id' => $cm->id));
     $mform = new \mod_email\compose_message_form($composeurl, array('contacts' => $contacts));
 
@@ -99,36 +99,32 @@ function email_get_composehtml($cm, $course, $email) {
         // The form was cancelled.
         $viewfoldersurl = new moodle_url('/mod/email/view.php', array('id' => $cm->id));
         redirect($viewfoldersurl);
-    } else if ($formdata = $mform->get_data()) {
-
+    } else if ($message = $mform->get_data()) {
         // The form was submitted with data.
 
         // Add the new message.
-        $message = new stdClass();
         $message->emailid     = $email->id;
         $message->timecreated = time();
-        $message->subject     = $formdata->subject;
-        $message->body        = $formdata->body['text'];
-        $message->bodyformat  = $formdata->body['format'];;
-        $message->bodytrust   = 0;
+        
         $message->status      = 'sent';
         $message->timesent    = time();
         $message->id = $DB->insert_record('email_message', $message);
 
-        if (isset($formdata->to)) { email_add_recipients($course->id, $email->id, $formdata->to, 'to', $message->id); }
-        if (isset($formdata->cc)) { email_add_recipients($course->id, $email->id, $formdata->cc, 'cc', $message->id); }
-        if (isset($formdata->bcc)) { email_add_recipients($course->id, $email->id, $formdata->bcc, 'bcc', $message->id); }
+        if (isset($message->to)) { email_add_recipients($course->id, $email->id, $message->to, 'to', $message->id); }
+        if (isset($message->cc)) { email_add_recipients($course->id, $email->id, $message->cc, 'cc', $message->id); }
+        if (isset($message->bcc)) { email_add_recipients($course->id, $email->id, $message->bcc, 'bcc', $message->id); }
 
         list($attachmentoptions, $bodyoptions) = email_get_form_options($email, $coursecontext);
-        $message = file_postupdate_standard_editor($message, 'body', $bodyoptions, $coursecontext, 'mod_email', 'bodyfiles', $message->id);
-        $message = file_postupdate_standard_filemanager($message, 'attachment', $attachmentoptions, $coursecontext, 'mod_email', 'attachmentfiles', $message->id);
+        $message = file_postupdate_standard_editor($message, 'body', $bodyoptions, $coursecontext, 'mod_email', 'message', $message->id);
+        $message = file_postupdate_standard_filemanager($message, 'attachments', $attachmentoptions, $coursecontext, 'mod_email', 'attachments', $message->id);
+
+        $DB->update_record('email_message', $message);
 
         // Return to the users inbox
         $viewfoldersurl = new moodle_url('/mod/email/view.php', array('id' => $cm->id));
         redirect($viewfoldersurl);
 
     } else {
-
         // Set the default data?
         $message = new stdClass();
         $message->id = null;
@@ -141,16 +137,13 @@ function email_get_composehtml($cm, $course, $email) {
         $message->bodytrust  = 0;
 
         list($attachmentoptions, $bodyoptions) = email_get_form_options($email, $coursecontext);
-        $message = file_prepare_standard_editor($message, 'body', $bodyoptions, $coursecontext, 'mod_email', 'bodyfiles', $message->id);
-        $message = file_prepare_standard_filemanager($message, 'attachment', $attachmentoptions, $coursecontext, 'mod_email', 'attachmentfiles', $message->id);
+        $message = file_prepare_standard_editor($message, 'body', $bodyoptions, $coursecontext, 'mod_email', 'body', $message->id);
+        $message = file_prepare_standard_filemanager($message, 'attachment', $attachmentoptions, $coursecontext, 'mod_email', 'attachment', $message->id);
 
         $mform->set_data($message);
-
-        // Display the form.
-        $composehtml .= $mform->render();
     }
-
-    
+    // Display the form.
+    $composehtml .= $mform->render();
     $composehtml .= "<br/>";
     
     return $composehtml;

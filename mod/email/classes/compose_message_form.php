@@ -35,10 +35,10 @@ class compose_message_form extends \moodleform {
         $mform->addElement('text', 'subject', get_string('subject', 'email'));
         $mform->setType('subject', PARAM_NOTAGS);    //Set type of element
 
-        $mform->addElement('editor', 'body', get_string("body", "email"));
+        $mform->addElement('editor', 'body_editor', get_string("body", "email"));
         $mform->setType('body', PARAM_RAW);
 
-        $mform->addElement('filemanager', 'attachments', get_string('attachments', 'email'));
+        $mform->addElement('filemanager', 'attachment_filemanager', get_string('attachment', 'email'));
 
         $this->add_action_buttons(true, get_string('send', 'email'));
     }
@@ -51,7 +51,7 @@ class compose_message_form extends \moodleform {
             $errors['norecipient'] = get_string('norecipient','email');
         }
 
-        if (empty(trim($data['body']['text']))) {
+        if (empty(trim($data['body_editor']['text']))) {
             $errors['bodyempty'] = get_string('bodyempty','email');
         }
 
