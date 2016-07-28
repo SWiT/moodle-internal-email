@@ -142,6 +142,8 @@ function email_get_composehtml($cm, $course, $email) {
         $composeform->body =    '';
         $composeform->bodyformat = editors_get_preferred_format();
         $composeform->bodytrust  = 0;
+        //$composeform = file_prepare_standard_editor($composeform, 'body', $attachmentoptions, $this->modcontext, 'mod_email', 'attachments', $this->subwiki->id);
+            
         $mform->set_data($composeform);
 
         // Display the form.
