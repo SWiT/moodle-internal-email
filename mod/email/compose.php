@@ -136,15 +136,21 @@ function email_get_composehtml($cm, $course, $email) {
     } else {
 
         // Set the default data?
-        $composeform = new stdClass();
-        $composeform->to = array();
-        $composeform->subject = '';
-        $composeform->body =    '';
-        $composeform->bodyformat = editors_get_preferred_format();
-        $composeform->bodytrust  = 0;
-        //$composeform = file_prepare_standard_editor($composeform, 'body', $attachmentoptions, $this->modcontext, 'mod_email', 'attachments', $this->subwiki->id);
-            
-        $mform->set_data($composeform);
+        $message = new stdClass();
+        $message->id = null;
+        $message->to = array(); // to, cc, & bcc are not part of the message table. Remember to convert them to messageusers.
+        $message->cc = array();
+        $message->bcc = array();
+        $message->subject = '';
+        $message->body =    '';
+        $message->bodyformat = editors_get_preferred_format();
+        $message->bodytrust  = 0;
+
+        list($attachmentoptions, $bodyoptions) = email_get_form_options($email, $coursecontext);
+        $message = file_prepare_standard_editor($message, 'body', $bodyoptions, $coursecontext, 'mod_email', 'bodyfiles', $message->id);
+        $message = file_prepare_standard_filemanager($message, 'attachment', $attachmentoptions, $coursecontext, 'mod_email', 'attachmentfiles', $message->id);
+
+        $mform->set_data($message);
 
         // Display the form.
         $composehtml .= $mform->render();
@@ -175,5 +181,5 @@ function email_get_form_options($email, $context){
                             , 'context'=>$context
                             );
 
-    return array('attachmentsoptions'=>$attachmentoptions, 'bodyoptions'=>$bodyoptions);
+    return array($attachmentoptions, $bodyoptions);
 }

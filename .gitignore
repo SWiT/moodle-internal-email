@@ -2,3 +2,4 @@
 *.sh
 /mod/email/nbproject/
 /mod/email/nbproject/private/
+/nbproject/private/

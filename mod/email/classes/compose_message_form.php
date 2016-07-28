@@ -28,6 +28,8 @@ class compose_message_form extends \moodleform {
             'noselectionstring' => get_string('selectrecipient', 'email'),
         );
         $mform->addElement('autocomplete', 'to', get_string('to', 'email'), $contacts, $options);
+        $mform->addElement('autocomplete', 'cc', get_string('cc', 'email'), $contacts, $options);
+        $mform->addElement('autocomplete', 'bcc', get_string('bcc', 'email'), $contacts, $options);
 
         
         $mform->addElement('text', 'subject', get_string('subject', 'email'));
