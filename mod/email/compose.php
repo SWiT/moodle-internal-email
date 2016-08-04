@@ -157,6 +157,7 @@ function email_add_recipients($courseid, $emailid, $userids, $type, $messageid) 
     global $DB;
     foreach ($userids as $userid) {
         $messageusers = new stdClass();
+        $messageusers->emailid = $emailid;
         $messageusers->messageid = $messageid;
         $messageusers->type = $type;
         $messageusers->userid = $userid;
