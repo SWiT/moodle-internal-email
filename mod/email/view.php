@@ -57,11 +57,12 @@ if ($id) {
     print_error('errormissingid','email');
 }
 
-//Make sure the user is logged in.
+// Make sure the user is logged in.
 require_login($course, true, $cm);
 
-$context = context_course::instance($course->id);
-require_capability('mod/email:view', $context);
+// Check user permissions.
+$coursecontext = context_course::instance($course->id);
+require_capability('mod/email:view', $coursecontext);
 
 // Handle bulk actions on messages.
 $withselected = optional_param('withselected', '', PARAM_TEXT); // What to do with selected messages.
@@ -141,6 +142,25 @@ $PAGE->set_heading(format_string($course->fullname));
 if (!isset($folder)) {
     // View the users inbox.
     $folder = email_get_users_inbox($USER->id, $email->id, $course->id);
+    // If no inbox was found. Create the default folders.
+    if (empty($folder)) {
+        // The inbox for the user was not found.
+        if (!is_enrolled($coursecontext, $USER->id)) {
+            // Error since the user is not enrolled in the course.
+            $url = new moodle_url("/user/index.php?id=".$course->id); // Course participants list.
+            print_error('errornofolder', 'email', $url);
+        }
+
+        // Create the default folders for the user.
+        email_create_default_folders($USER->id, $email->id);
+    }
+
+    $folder = email_get_users_inbox($USER->id, $email->id, $course->id);
+    if (empty($folder)) {
+        // Error: The inbox for the user was still not found, somethign went wrong
+        $url = new moodle_url("/user/index.php?id=".$course->id); // Course participants list.
+        print_error('errorcreatingfolders', 'email', $url);
+    }
 }
 
 $folderurl = new moodle_url('/mod/email/view.php', array('f' => $folder->id));

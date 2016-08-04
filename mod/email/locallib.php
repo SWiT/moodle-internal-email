@@ -483,15 +483,39 @@ function email_get_perpage() {
     return $perpage;
 }
 
-function email_get_users_inbox($userid, $emailid, $courseid) {
+function email_get_users_inbox($userid, $emailid) {
     global $DB;
-    try {
-        $params = array('userid' => $userid, 'emailid' => $emailid, 'type' => EMAIL_INBOX);
-        $folder  = $DB->get_record('email_folder', $params, '*', MUST_EXIST);
-    } catch (Exception $e) {
-        // Error the inbox for the user was not found.
-        $url = new moodle_url("/user/index.php?id=".$courseid); // Course participants list.
-        print_error('errornofolder', 'email', $url);
-    }
+    $params = array('userid' => $userid, 'emailid' => $emailid, 'type' => EMAIL_INBOX);
+    $folder  = $DB->get_record('email_folder', $params);
     return $folder;
+}
+
+function email_create_default_folders($userid, $emailid) {
+    global $DB;
+
+    $folder = new stdClass();
+    $folder->userid = $userid;
+    $folder->parentfolderid = EMAIL_ROOT_FOLDER;
+    $folder->emailid = $emailid;
+    $folder->deleted = 0;
+
+    $folder->name = "Inbox";
+    $folder->type = EMAIL_INBOX;
+    $folder->parenttype = EMAIL_INBOX;
+    $DB->insert_record('email_folder', $folder);
+
+    $folder->name = "Draft";
+    $folder->type = EMAIL_DRAFT;
+    $folder->parenttype = EMAIL_DRAFT;
+    $DB->insert_record('email_folder', $folder);
+
+    $folder->name = "Sent";
+    $folder->type = EMAIL_SENT;
+    $folder->parenttype = EMAIL_SENT;
+    $DB->insert_record('email_folder', $folder);
+
+    $folder->name = "Trash";
+    $folder->type = EMAIL_TRASH;
+    $folder->parenttype = EMAIL_TRASH;
+    $DB->insert_record('email_folder', $folder);
 }

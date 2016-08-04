@@ -60,6 +60,7 @@ $string['moveto'] = 'Move to';
 $string['errormissingid'] = 'Error: You must specify a course_module ID or an instance ID.';
 $string['errormessageids'] = 'Error: You must specify a folder ID and a message ID.';
 $string['errornofolder'] = 'Error: The instance ID or folder ID is not valid for the current user.';
+$string['errorcreatingfolders'] = 'Error: Creating the default folders for the user seems to have failed.';
 
 $string['addsubfolder'] = 'Add folder';
 $string['editsubfolder'] = 'Edit folder';

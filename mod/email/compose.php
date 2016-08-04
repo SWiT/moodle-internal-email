@@ -109,13 +109,13 @@ function email_get_composehtml($cm, $course, $email) {
         $message->emailid     = $email->id;
         $message->timecreated = time();
         
-        $message->status      = 'sent';
+        $message->status      = EMAIL_MESSAGE_STATUS_SENT;
         $message->timesent    = time();
         $message->id = $DB->insert_record('email_message', $message);
 
-        if (isset($message->to)) { email_add_recipients($course->id, $email->id, $message->to, 'to', $message->id); }
-        if (isset($message->cc)) { email_add_recipients($course->id, $email->id, $message->cc, 'cc', $message->id); }
-        if (isset($message->bcc)) { email_add_recipients($course->id, $email->id, $message->bcc, 'bcc', $message->id); }
+        if (isset($message->to)) { email_add_recipients($course->id, $email->id, $message->to, EMAIL_USER_TYPE_TO, $message->id); }
+        if (isset($message->cc)) { email_add_recipients($course->id, $email->id, $message->cc, EMAIL_USER_TYPE_CC, $message->id); }
+        if (isset($message->bcc)) { email_add_recipients($course->id, $email->id, $message->bcc, EMAIL_USER_TYPE_BCC, $message->id); }
 
         list($attachmentoptions, $bodyoptions) = email_get_form_options($email, $coursecontext);
         $message = file_postupdate_standard_editor($message, 'body', $bodyoptions, $coursecontext, 'mod_email', 'message', $message->id);
@@ -161,7 +161,16 @@ function email_add_recipients($courseid, $emailid, $userids, $type, $messageid) 
         $messageusers->messageid = $messageid;
         $messageusers->type = $type;
         $messageusers->userid = $userid;
-        $folder = email_get_users_inbox($userid, $emailid, $courseid);
+
+        $folder = email_get_users_inbox($userid, $emailid);
+        // If no inbox was found and the user is enrolled in the course. Create the default folders.
+        $coursecontext = context_course::instance($courseid);
+        if (empty($folder) && is_enrolled($coursecontext, $userid)) {
+            // Create the default folders for the user.
+            email_create_default_folders($userid, $emailid);
+            $folder = email_get_users_inbox($userid, $emailid);
+        }
+        
         $messageusers->folderid = $folder->id;
         $messageusers->viewed = 0;
         $messageusers->timeviewed = 0;
