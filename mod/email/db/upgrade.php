@@ -584,8 +584,33 @@ function xmldb_email_upgrade($oldversion) {
             $emu->emailid = $message->emailid;
             $DB->update_record('email_message_users', $emu);
         }
-        
+
         upgrade_mod_savepoint(true, 2016080401, 'email');
+    }
+
+    if ($oldversion < 2016080402) {
+        // Convert email_message.status to an integer and defined constants.
+        define('EMAIL_MESSAGE_STATUS_DRAFT', 0);
+        define('EMAIL_MESSAGE_STATUS_SENT', 1);
+
+        $table = new xmldb_table('email_message');
+        $field = new xmldb_field('status', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0);
+
+        if (!$dbman->field_exists($table, $field)) {
+            $messages = $DB->get_recordset('email_message', array('status' => 'sent'));
+            foreach($messages as $message) {
+                $message->status = EMAIL_MESSAGE_STATUS_SENT;
+                $DB->update_record('email_message', $message);
+            }
+            $messages = $DB->get_recordset('email_message', array('status' => 'draft'));
+            foreach($messages as $message) {
+                $message->status = EMAIL_MESSAGE_STATUS_DRAFT;
+                $DB->update_record('email_message', $message);
+            }
+            $dbman->change_field_type($table, $field);
+        }
+        
+        upgrade_mod_savepoint(true, 2016080402, 'email');
     }
 
     return true;

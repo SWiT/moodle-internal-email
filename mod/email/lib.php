@@ -46,6 +46,9 @@ define('EMAIL_USER_TYPE_TO', 1);
 define('EMAIL_USER_TYPE_CC', 2);
 define('EMAIL_USER_TYPE_BCC', 3);
 
+define('EMAIL_MESSAGE_STATUS_DRAFT', 0);
+define('EMAIL_MESSAGE_STATUS_SENT', 1);
+
 /* Moodle core API */
 
 /**
