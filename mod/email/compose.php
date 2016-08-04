@@ -42,6 +42,9 @@ if ($id) {
 
 require_login($course, true, $cm);
 
+$context = context_course::instance($course->id);
+require_capability('mod/email:view', $context);
+
 // Print the page header.
 
 $PAGE->set_url('/mod/email/folders.php', array('id' => $cm->id));

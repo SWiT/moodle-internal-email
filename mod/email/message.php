@@ -47,6 +47,9 @@ if ($m && $f) {
 
 require_login($course, true, $cm);
 
+$context = context_course::instance($course->id);
+require_capability('mod/email:view', $context);
+
 $event = \mod_email\event\course_module_viewed::create(array(
         'objectid' => $PAGE->cm->instance,
         'context' => $PAGE->context,

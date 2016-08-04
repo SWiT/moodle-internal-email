@@ -60,6 +60,9 @@ if ($id) {
 //Make sure the user is logged in.
 require_login($course, true, $cm);
 
+$context = context_course::instance($course->id);
+require_capability('mod/email:view', $context);
+
 // Handle bulk actions on messages.
 $withselected = optional_param('withselected', '', PARAM_TEXT); // What to do with selected messages.
 $emuid = optional_param_array('emuid', array(), PARAM_INT);
