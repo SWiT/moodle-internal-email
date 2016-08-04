@@ -17,7 +17,7 @@
 /**
  * An interface for creating and sending internal email messages
  *
- * @package    mod_webexactvity
+ * @package    mod_email
  * @author     Matt Switlik <switlik@oakland.edu>
  * @copyright  2016 Oakland University
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

@@ -110,7 +110,7 @@ class folder_messages_table extends \table_sql implements \renderable {
             $from = "{email_message} EM"
                         . " JOIN {email_message_users} EMU1"
                         . "     ON EMU1.messageid = EM.id"
-                        . "     AND EMU1.type = 'from'"
+                        . "     AND EMU1.type = " . EMAIL_USER_TYPE_FROM
                         . "     AND EMU1.folderid = ?"
                         . "     AND EMU1.userid = ?"
                         ;
@@ -134,12 +134,15 @@ class folder_messages_table extends \table_sql implements \renderable {
             $from = "{email_message} EM"
                         . " JOIN {email_message_users} EMU1"
                         . "     ON EMU1.messageid = EM.id"
-                        . "     AND EMU1.type = 'to'"
+                        . "     AND ( EMU1.type = " . EMAIL_USER_TYPE_TO
+                                    . " OR EMU1.type = " . EMAIL_USER_TYPE_CC
+                                    . " OR EMU1.type = " . EMAIL_USER_TYPE_BCC
+                                .")"
                         . "     AND EMU1.folderid = ?"
                         . "     AND EMU1.userid = ?"
                         . " JOIN {email_message_users} EMU2"
                         . "     ON EMU2.messageid = EM.id"
-                        . "     AND EMU2.type = 'from'"
+                        . "     AND EMU2.type = " . EMAIL_USER_TYPE_FROM
                         . " JOIN {user} U"
                         . "     ON U.id = EMU2.userid"
                         ;
