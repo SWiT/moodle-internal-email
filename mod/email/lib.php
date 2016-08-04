@@ -93,8 +93,6 @@ function email_add_instance(stdClass $email, mod_email_mod_form $mform = null) {
 
     $email->id = $DB->insert_record('email', $email);
 
-    email_grade_item_update($email);
-
     return $email->id;
 }
 
@@ -119,8 +117,6 @@ function email_update_instance(stdClass $email, mod_email_mod_form $mform = null
 
     $result = $DB->update_record('email', $email);
 
-    email_grade_item_update($email);
-
     return $result;
 }
 
@@ -141,8 +137,9 @@ function email_delete_instance($id) {
         return false;
     }
 
-    // Delete any dependent records here.
-
+    $DB->delete_records('email_messageusers', array('emailid' => $email->id));
+    $DB->delete_records('email_message', array('emailid' => $email->id));
+    $DB->delete_records('email_folder', array('emailid' => $email->id));
     $DB->delete_records('email', array('id' => $email->id));
 
     email_grade_item_delete($email);
@@ -255,114 +252,6 @@ function email_cron () {
  */
 function email_get_extra_capabilities() {
     return array();
-}
-
-/* Gradebook API */
-
-/**
- * Is a given scale used by the instance of email?
- *
- * This function returns if a scale is being used by one email
- * if it has support for grading and scales.
- *
- * @param int $emailid ID of an instance of this module
- * @param int $scaleid ID of the scale
- * @return bool true if the scale is used by the given email instance
- */
-function email_scale_used($emailid, $scaleid) {
-    global $DB;
-
-    if ($scaleid and $DB->record_exists('email', array('id' => $emailid, 'grade' => -$scaleid))) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-/**
- * Checks if scale is being used by any instance of email.
- *
- * This is used to find out if scale used anywhere.
- *
- * @param int $scaleid ID of the scale
- * @return boolean true if the scale is used by any email instance
- */
-function email_scale_used_anywhere($scaleid) {
-    global $DB;
-
-    if ($scaleid and $DB->record_exists('email', array('grade' => -$scaleid))) {
-        return true;
-    } else {
-        return false;
-    }
-}
-
-/**
- * Creates or updates grade item for the given email instance
- *
- * Needed by {@link grade_update_mod_grades()}.
- *
- * @param stdClass $email instance object with extra cmidnumber and modname property
- * @param bool $reset reset grades in the gradebook
- * @return void
- */
-function email_grade_item_update(stdClass $email, $reset=false) {
-    global $CFG;
-    require_once($CFG->libdir.'/gradelib.php');
-
-    $item = array();
-    $item['itemname'] = clean_param($email->name, PARAM_NOTAGS);
-    $item['gradetype'] = GRADE_TYPE_VALUE;
-
-    if ($email->grade > 0) {
-        $item['gradetype'] = GRADE_TYPE_VALUE;
-        $item['grademax']  = $email->grade;
-        $item['grademin']  = 0;
-    } else if ($email->grade < 0) {
-        $item['gradetype'] = GRADE_TYPE_SCALE;
-        $item['scaleid']   = -$email->grade;
-    } else {
-        $item['gradetype'] = GRADE_TYPE_NONE;
-    }
-
-    if ($reset) {
-        $item['reset'] = true;
-    }
-
-    grade_update('mod/email', $email->course, 'mod', 'email',
-            $email->id, 0, null, $item);
-}
-
-/**
- * Delete grade item for given email instance
- *
- * @param stdClass $email instance object
- * @return grade_item
- */
-function email_grade_item_delete($email) {
-    global $CFG;
-    require_once($CFG->libdir.'/gradelib.php');
-
-    return grade_update('mod/email', $email->course, 'mod', 'email',
-            $email->id, 0, null, array('deleted' => 1));
-}
-
-/**
- * Update email grades in the gradebook
- *
- * Needed by {@link grade_update_mod_grades()}.
- *
- * @param stdClass $email instance object with extra cmidnumber and modname property
- * @param int $userid update grade of specific user only, 0 means all participants
- */
-function email_update_grades(stdClass $email, $userid = 0) {
-    global $CFG, $DB;
-    require_once($CFG->libdir.'/gradelib.php');
-
-    // Populate array of grade objects indexed by userid.
-    $grades = array();
-
-    grade_update('mod/email', $email->course, 'mod', 'email', $email->id, 0, $grades);
 }
 
 /* File API */

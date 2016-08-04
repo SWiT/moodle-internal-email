@@ -570,5 +570,23 @@ function xmldb_email_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2016080400, 'email');
     }
 
+    if ($oldversion < 2016080401) {
+        // Add emailid field to email_message_users for easier handling of module instances.
+        $table = new xmldb_table('email_message_users');
+        $field = new xmldb_field('emailid', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0, 'id');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        $emus = $DB->get_recordset('email_message_users', array('emailid' => 0));
+        foreach ($emus as $emu) {
+            $message = $DB->get_record('email_message', array('id' => $emu->messageid));
+            $emu->emailid = $message->emailid;
+            $DB->update_record('email_message_users', $emu);
+        }
+        
+        upgrade_mod_savepoint(true, 2016080401, 'email');
+    }
+
     return true;
 }
