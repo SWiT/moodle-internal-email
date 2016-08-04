@@ -41,6 +41,11 @@ define('EMAIL_ROOT_FOLDER', 0);
 
 define('EMAIL_DEFAULT_PERPAGE', 25);
 
+define('EMAIL_USER_TYPE_FROM', 0);
+define('EMAIL_USER_TYPE_TO', 1);
+define('EMAIL_USER_TYPE_CC', 2);
+define('EMAIL_USER_TYPE_BCC', 3);
+
 /* Moodle core API */
 
 /**

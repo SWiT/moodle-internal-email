@@ -528,5 +528,47 @@ function xmldb_email_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2016072700, 'email');
     }
 
+    if ($oldversion < 2016080400) {
+        // Convert the message users type field to integers.
+        define('EMAIL_USER_TYPE_FROM', 0);
+        define('EMAIL_USER_TYPE_TO', 1);
+        define('EMAIL_USER_TYPE_CC', 2);
+        define('EMAIL_USER_TYPE_BCC', 3);
+
+        $table = new xmldb_table('email_message_users');
+        $field = new xmldb_field('type', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0, 'messageid');
+
+        if (!$dbman->field_exists($table, $field)) {
+            // From users
+            $users = $DB->get_recordset('email_message_users', array('type'=>'from'));
+            foreach($users as $user) {
+                $user->type = EMAIL_USER_TYPE_FROM;
+                $DB->update_record('email_message_users', $user);
+            }
+            // To users
+            $users = $DB->get_recordset('email_message_users', array('type'=>'to'));
+            foreach($users as $user) {
+                $user->type = EMAIL_USER_TYPE_TO;
+                $DB->update_record('email_message_users', $user);
+            }
+            // CC users
+            $users = $DB->get_recordset('email_message_users', array('type'=>'cc'));
+            foreach($users as $user) {
+                $user->type = EMAIL_USER_TYPE_CC;
+                $DB->update_record('email_message_users', $user);
+            }
+            // BCC users
+            $users = $DB->get_recordset('email_message_users', array('type'=>'bcc'));
+            foreach($users as $user) {
+                $user->type = EMAIL_USER_TYPE_BCC;
+                $DB->update_record('email_message_users', $user);
+            }
+
+            $dbman->change_field_type($table, $field);
+        }
+
+        upgrade_mod_savepoint(true, 2016080400, 'email');
+    }
+
     return true;
 }

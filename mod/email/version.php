@@ -28,7 +28,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_email';
-$plugin->version = 2016072700;
+$plugin->version = 2016080400;
 $plugin->release = '3.0.3';
 $plugin->requires = 2014051200;
 $plugin->maturity = MATURITY_ALPHA;

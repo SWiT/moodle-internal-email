@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Displays the folder of internal email messages or a single internal email message.
+ * Displays the a single internal email message.
  *
  *
  * @package    mod_email
@@ -23,8 +23,6 @@
  * @author     Matthew SWitlik
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-// Replace email with the name of your module and remove this line.
 
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once(dirname(__FILE__).'/lib.php');
