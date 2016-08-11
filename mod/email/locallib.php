@@ -86,7 +86,7 @@ function email_get_recipients($messageid) {
         $names .= fullname($user).", ";
     }
     if (!empty($names)) {
-        $names = substr($names, 0, -2);
+        $names = substr($names, 0, -2); // Trim that last comma we added.
     }
     return $names;
 }

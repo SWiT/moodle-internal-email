@@ -83,6 +83,25 @@ echo email_messageelement(get_string('sent', 'email'), userdate($message->timese
 echo email_messageelement(get_string('subject', 'email'), $message->subject);
 echo email_messageelement(get_string('body', 'email'), $message->body);
 
+$context = context_module::instance($cm->id);
+$fs = get_file_storage();
+$files = $fs->get_area_files($context->id, 'mod_email', 'attachments', $message->id);
+$tmp = '';
+if(count($files)>1){
+    $tmp.= "<ul>";
+    foreach ($files as $f) {
+        // $f is an instance of stored_file
+        $filename = $f->get_filename();
+        if($filename != '.'){
+            $url = "{$CFG->wwwroot}/pluginfile.php/{$f->get_contextid()}/mod_email/attachments";
+            $fileurl = $url.$f->get_filepath().$f->get_itemid().'/'.rawurlencode($filename);
+            $tmp .= "<li>".html_writer::link($fileurl, $filename)." &nbsp;".display_size($f->get_filesize())."</li>";
+        }
+    }
+    $tmp.= "</ul>";
+}
+echo email_messageelement(get_string('attachment', 'email'), $tmp);
+
 
 if ($previd = email_get_prev_messageid($folder, $message->id)) {
     $baseurl = new moodle_url("message.php", array('f' => $folder->id, 'p' => $p, 'm' => $previd));
