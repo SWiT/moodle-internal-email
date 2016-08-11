@@ -55,7 +55,7 @@ function email_makebold($text, $viewed) {
 function email_get_sender($messageid) {
     global $DB, $CFG;
     $name = "";
-    $emu = $DB->get_record("email_message_users", array('messageid' => $messageid, 'type' => 'from'), '*', MUST_EXIST);
+    $emu = $DB->get_record("email_message_users", array('messageid' => $messageid, 'type' => EMAIL_USER_TYPE_FROM), '*', MUST_EXIST);
     $user = $DB->get_record('user',array("id" => $emu->userid));
     return fullname($user);
 }
@@ -70,7 +70,17 @@ function email_get_sender($messageid) {
 function email_get_recipients($messageid) {
     global $DB, $CFG;
     $names = "";
-    $emus = $DB->get_records("email_message_users", array('messageid' => $messageid, 'type'=>'to'));
+    $emus = $DB->get_records("email_message_users", array('messageid' => $messageid, 'type'=> EMAIL_USER_TYPE_TO));
+    foreach ($emus as $emu) {
+        $user = $DB->get_record('user',array("id" => $emu->userid));
+        $names .= fullname($user).", ";
+    }
+    $emus = $DB->get_records("email_message_users", array('messageid' => $messageid, 'type'=> EMAIL_USER_TYPE_CC));
+    foreach ($emus as $emu) {
+        $user = $DB->get_record('user',array("id" => $emu->userid));
+        $names .= fullname($user).", ";
+    }
+    $emus = $DB->get_records("email_message_users", array('messageid' => $messageid, 'type'=> EMAIL_USER_TYPE_BCC));
     foreach ($emus as $emu) {
         $user = $DB->get_record('user',array("id" => $emu->userid));
         $names .= fullname($user).", ";
