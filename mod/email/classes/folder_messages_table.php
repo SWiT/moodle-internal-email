@@ -187,7 +187,14 @@ class folder_messages_table extends \table_sql implements \renderable {
      * @return string
      */
     public function col_select(\stdClass $message) {
-       return '<input type="checkbox" class="usercheckbox" name="emuid[]" value="'.$message->emuid.'" />';
+        global $OUTPUT;
+
+        $attachment_icon = '';
+        if (email_has_attachments($message) ) {
+            //$attachment_icon = "<img src='".$OUTPUT->pix_url('clip.gif', 'email')."'>"; // Why doesn't this work???
+            $attachment_icon = "<img src='pix/clip.gif'>";
+        }
+        return '<input type="checkbox" class="usercheckbox" name="emuid[]" value="'.$message->emuid.'" />'.$attachment_icon;
     }
 
     public function col_lastname(\stdClass $message) {

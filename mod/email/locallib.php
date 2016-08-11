@@ -519,3 +519,25 @@ function email_create_default_folders($userid, $emailid) {
     $folder->parenttype = EMAIL_TRASH;
     $DB->insert_record('email_folder', $folder);
 }
+
+/**
+ * This functions return if mail has attachments
+ *
+ * @param object $mail Mail
+ * @return boolean Success/Fail
+ * @todo Finish documenting this function
+ **/
+function email_has_attachments($message) {
+
+    $cm = get_coursemodule_from_instance('email', $message->emailid);
+    $context = context_module::instance($cm->id);
+
+    $fs = get_file_storage();
+    $files = $fs->get_area_files($context->id, 'mod_email', 'attachments', $message->id);
+    if(count($files)>1){
+        return true;
+    }
+
+    $files = $fs->get_area_files($context->id, 'mod_email', 'body', $message->id);
+    return (count($files)>1);
+}
