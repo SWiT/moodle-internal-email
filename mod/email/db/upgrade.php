@@ -315,14 +315,12 @@ function xmldb_email_upgrade($oldversion) {
         }
 
         // Migrate the folder and subfolder data.
-        define('EMAIL_FOLDER', 0);
-        define('EMAIL_INBOX', 1);
-        define('EMAIL_SENT', 2);
-        define('EMAIL_TRASH', 3);
-        define('EMAIL_DRAFT', 4);
+        define('EMAILFOLDER', 0);
+        define('EMAILINBOX', 1);
+        define('EMAILSENT', 2);
+        define('EMAILTRASH', 3);
+        define('EMAILDRAFT', 4);
 
-        define('EMAIL_DEFAULT_PAGE_SIZE', 10);
-        
         $folders = $DB->get_recordset('email_folder');
         foreach ($folders as $folder) {
             if($account = $DB->get_record('email_account', array("id" => $folder->accountid))) {
@@ -332,7 +330,7 @@ function xmldb_email_upgrade($oldversion) {
             }
 
             if (is_null($folder->isparenttype)) {
-                $folder->type = EMAIL_FOLDER;
+                $folder->type = EMAILFOLDER;
                 if ($subfolder = $DB->get_record('email_subfolder', array("folderchildid" => $folder->id))) {
                     $folder->parentfolderid = $subfolder->folderparentid;
                 }else{
@@ -341,16 +339,16 @@ function xmldb_email_upgrade($oldversion) {
             } else {
                 switch ($folder->isparenttype) {
                     case 'inbox':
-                        $folder->type = EMAIL_INBOX;
+                        $folder->type = EMAILINBOX;
                         break;
                     case 'sendbox':
-                        $folder->type = EMAIL_SENT;
+                        $folder->type = EMAILSENT;
                         break;
                     case 'trash':
-                        $folder->type = EMAIL_TRASH;
+                        $folder->type = EMAILTRASH;
                         break;
                     case 'draft':
-                        $folder->type = EMAIL_DRAFT;
+                        $folder->type = EMAILDRAFT;
                         break;
                 }
                 $folder->parentfolderid = 0;
@@ -530,42 +528,40 @@ function xmldb_email_upgrade($oldversion) {
 
     if ($oldversion < 2016080400) {
         // Convert the message users type field to integers.
-        define('EMAIL_USER_TYPE_FROM', 0);
-        define('EMAIL_USER_TYPE_TO', 1);
-        define('EMAIL_USER_TYPE_CC', 2);
-        define('EMAIL_USER_TYPE_BCC', 3);
+        define('USER_TYPE_FROM', 0);
+        define('USER_TYPE_TO', 1);
+        define('USER_TYPE_CC', 2);
+        define('USER_TYPE_BCC', 3);
 
         $table = new xmldb_table('email_message_users');
-        $field = new xmldb_field('type', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0, 'messageid');
+        $field = new xmldb_field('type', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0);
 
-        if (!$dbman->field_exists($table, $field)) {
-            // From users
-            $users = $DB->get_recordset('email_message_users', array('type'=>'from'));
-            foreach($users as $user) {
-                $user->type = EMAIL_USER_TYPE_FROM;
-                $DB->update_record('email_message_users', $user);
-            }
-            // To users
-            $users = $DB->get_recordset('email_message_users', array('type'=>'to'));
-            foreach($users as $user) {
-                $user->type = EMAIL_USER_TYPE_TO;
-                $DB->update_record('email_message_users', $user);
-            }
-            // CC users
-            $users = $DB->get_recordset('email_message_users', array('type'=>'cc'));
-            foreach($users as $user) {
-                $user->type = EMAIL_USER_TYPE_CC;
-                $DB->update_record('email_message_users', $user);
-            }
-            // BCC users
-            $users = $DB->get_recordset('email_message_users', array('type'=>'bcc'));
-            foreach($users as $user) {
-                $user->type = EMAIL_USER_TYPE_BCC;
-                $DB->update_record('email_message_users', $user);
-            }
-
-            $dbman->change_field_type($table, $field);
+        // From users
+        $users = $DB->get_recordset('email_message_users', array('type'=>'from'));
+        foreach($users as $user) {
+            $user->type = USER_TYPE_FROM;
+            $DB->update_record('email_message_users', $user);
         }
+        // To users
+        $users = $DB->get_recordset('email_message_users', array('type'=>'to'));
+        foreach($users as $user) {
+            $user->type = USER_TYPE_TO;
+            $DB->update_record('email_message_users', $user);
+        }
+        // CC users
+        $users = $DB->get_recordset('email_message_users', array('type'=>'cc'));
+        foreach($users as $user) {
+            $user->type = USER_TYPE_CC;
+            $DB->update_record('email_message_users', $user);
+        }
+        // BCC users
+        $users = $DB->get_recordset('email_message_users', array('type'=>'bcc'));
+        foreach($users as $user) {
+            $user->type = USER_TYPE_BCC;
+            $DB->update_record('email_message_users', $user);
+        }
+
+        $dbman->change_field_type($table, $field);
 
         upgrade_mod_savepoint(true, 2016080400, 'email');
     }
@@ -590,25 +586,23 @@ function xmldb_email_upgrade($oldversion) {
 
     if ($oldversion < 2016080402) {
         // Convert email_message.status to an integer and defined constants.
-        define('EMAIL_MESSAGE_STATUS_DRAFT', 0);
-        define('EMAIL_MESSAGE_STATUS_SENT', 1);
+        define('MESSAGE_STATUS_DRAFT', 0);
+        define('MESSAGE_STATUS_SENT', 1);
 
         $table = new xmldb_table('email_message');
         $field = new xmldb_field('status', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0);
 
-        if (!$dbman->field_exists($table, $field)) {
-            $messages = $DB->get_recordset('email_message', array('status' => 'sent'));
-            foreach($messages as $message) {
-                $message->status = EMAIL_MESSAGE_STATUS_SENT;
-                $DB->update_record('email_message', $message);
-            }
-            $messages = $DB->get_recordset('email_message', array('status' => 'draft'));
-            foreach($messages as $message) {
-                $message->status = EMAIL_MESSAGE_STATUS_DRAFT;
-                $DB->update_record('email_message', $message);
-            }
-            $dbman->change_field_type($table, $field);
+        $messages = $DB->get_recordset('email_message', array('status' => 'sent'));
+        foreach($messages as $message) {
+            $message->status = MESSAGE_STATUS_SENT;
+            $DB->update_record('email_message', $message);
         }
+        $messages = $DB->get_recordset('email_message', array('status' => 'draft'));
+        foreach($messages as $message) {
+            $message->status = MESSAGE_STATUS_DRAFT;
+            $DB->update_record('email_message', $message);
+        }
+        $dbman->change_field_type($table, $field);
         
         upgrade_mod_savepoint(true, 2016080402, 'email');
     }
