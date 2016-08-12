@@ -320,7 +320,30 @@ function email_pluginfile($course, $cm, $context, $filearea, array $args, $force
 
     require_login($course, true, $cm);
 
-    send_file_not_found();
+    $fileareas = array('attachments', 'body');
+    if (!in_array($filearea, $fileareas)) {
+        return false;
+    }
+
+    $messageid = (int)array_shift($args);
+
+    if (!$message = $DB->get_record('email_message', array('id'=>$messageid))) {
+        return false;
+    }
+
+    if (!$email = $DB->get_record('email', array('id'=>$cm->instance))) {
+        return false;
+    }
+
+    $fs = get_file_storage();
+    $relativepath = implode('/', $args);
+    $fullpath = "/$context->id/mod_email/$filearea/$messageid/$relativepath";
+    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
+        return false;
+    }
+
+    // finally send the file
+    send_stored_file($file, 0, 0, true); // download MUST be forced - security!
 }
 
 /* Navigation API */
